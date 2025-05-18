@@ -2,6 +2,7 @@
 import os
 import replicate
 import requests
+import random
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -37,6 +38,22 @@ def home():
 
 @app.route("/generate", methods=["POST"])
 def generate_image():
+    roles = [
+        {"label": "civilian villager", "description": "wearing modest clothes in browns or greens, soft smile, no headband, background of wooden buildings"},
+        {"label": "young Genin", "description": "Leaf headband, fingerless gloves, basic ninja outfit, hopeful look, trees in the background"},
+        {"label": "Chūnin", "description": "green flak jacket, confident expression, short cropped hair, mission-ready"},
+        {"label": "elite Jōnin", "description": "ninja headband with battle-ready gear, focused intense eyes, scars or facial detail"},
+        {"label": "Anbu Black Ops", "description": "animal mask covering face, dark armor, mysterious vibe, misty background"},
+        {"label": "Rogue ninja", "description": "scratched headband, torn cloak, rebellious eyes, cloudy background"},
+        {"label": "Akatsuki member", "description": "black cloak with red clouds, intense expression, rainy or moody background"},
+        {"label": "Hidden Leaf teacher", "description": "casual outfit with clipboard or scroll, warm friendly expression, classroom setting"},
+        {"label": "Hokage", "description": "traditional Hokage robes, formal headpiece, wise expression, background of stone faces"}
+    ]
+    selected = random.choice(roles)
+    selected_role = selected["label"]
+    role_desc = selected["description"]
+    prompt_text = f"""Convert this person into a character from the anime universe. Keep the original facial structure, but draw them in a fantasy anime art style. Make it a close-up portrait with soft anime lighting, cel-shading, and thick outlines. This character is a {selected_role} with {role_desc}. Use vivid colors and a soft, painterly anime background."""
+    
     if 'image' not in request.files:
         return jsonify({"error": "No image file provided"}), 400
     
@@ -55,7 +72,8 @@ def generate_image():
         output = replicate.run(
             "bytedance/pulid:43d309c37ab4e62361e5e29b8e9e867fb2dcbcec77ae91206a8d95ac5dd451a0",
             input={
-                "prompt": "Fantasy character style, close-up portrait, detailed features, vibrant colors, sharp lines, 1024x1024",
+                "prompt": prompt_text,
+                "num_outputs": 3,
                 "main_face_image": open(image_path, "rb")
             }
         )
@@ -68,7 +86,24 @@ def generate_image():
             output_urls = [str(output)]
             
         print(f"✅ Output URLs: {output_urls}")
-        return jsonify({"image_urls": output_urls})
+        
+        def score_for(role):
+            weights = {
+                "civilian villager": (0, 40),
+                "young Genin": (30, 60),
+                "Chūnin": (40, 70),
+                "elite Jōnin": (60, 85),
+                "Anbu Black Ops": (70, 90),
+                "Rogue ninja": (60, 90),
+                "Akatsuki member": (80, 100),
+                "Hidden Leaf teacher": (50, 80),
+                "Hokage": (90, 100)
+            }
+            low, high = weights.get(selected_role, (30, 70))
+            return random.randint(low, high)
+            
+        scores = [score_for(selected_role) for _ in output_urls]
+        return jsonify({"image_urls": output_urls, "role": selected_role, "scores": scores})
         
     except Exception as e:
         error_message = str(e)

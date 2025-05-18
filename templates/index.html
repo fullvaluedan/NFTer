@@ -101,14 +101,36 @@
         } else {
           // Handle the response based on whether it's an array or single URL
           const images = Array.isArray(data.image_urls) ? data.image_urls : [data.image_urls];
+          const role = data.role || "fantasy character";
+          const scores = data.scores || Array(images.length).fill(50);
           
-          let resultHTML = `<h5 class="mb-3">Your Transformed Image</h5>`;
-          images.forEach(url => {
+          let resultHTML = `
+            <h5 class="mb-3">Your Transformed Image</h5>
+            <div class="alert alert-info">
+              <p class="mb-0">Your character has been transformed into <strong>${role}</strong>!</p>
+            </div>
+          `;
+          
+          images.forEach((url, index) => {
+            const score = scores[index];
+            let scoreClass = "bg-warning";
+            if (score >= 80) scoreClass = "bg-success";
+            else if (score <= 30) scoreClass = "bg-danger";
+            
             resultHTML += `
-              <div class="mb-3">
-                <img src="${url}" class="result-image" alt="Transformed Image">
-                <div class="mt-2">
-                  <a href="${url}" class="btn btn-success btn-sm" download target="_blank">Download Image</a>
+              <div class="mb-4 card bg-dark border-secondary">
+                <div class="card-body text-center">
+                  <img src="${url}" class="result-image mb-3" alt="Transformed Image">
+                  <div class="mb-3">
+                    <h6>Power Level: ${score}%</h6>
+                    <div class="progress" style="height: 10px;">
+                      <div class="progress-bar ${scoreClass}" role="progressbar" style="width: ${score}%" 
+                        aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                  <div class="mt-2">
+                    <a href="${url}" class="btn btn-success btn-sm" download target="_blank">Download Image</a>
+                  </div>
                 </div>
               </div>
             `;
