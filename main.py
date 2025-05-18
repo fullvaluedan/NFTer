@@ -21,14 +21,15 @@ def upload_to_replicate(image_path):
             files={"file": f},
             headers={"Authorization": f"Token {os.environ['REPLICATE_API_TOKEN']}"}
         )
+    print("Upload response status:", response.status_code)
+    print("Raw response:", response.text)
+
     try:
         data = response.json()
-        print("📦 Response:", data)
+        return data.get("upload_url")
     except Exception as e:
-        print("❌ Failed to decode JSON:", e)
-        print("📦 Raw response:", response.text)
+        print("❌ JSON decode error:", e)
         return None
-    return data.get("upload_url")
 
 @app.route("/")
 def home():
@@ -55,7 +56,7 @@ def generate_image():
             "bytedance/pulid:43d309c37ab4e62361e5e29b8e9e867fb2dcbcec77ae91206a8d95ac5dd451a0",
             input={
                 "prompt": "Fantasy character style, close-up portrait, detailed features, vibrant colors, sharp lines, 1024x1024",
-                "image": open(image_path, "rb")
+                "main_face_image": open(image_path, "rb")
             }
         )
         print(f"✅ Output received: {output}")
