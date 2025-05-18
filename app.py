@@ -1,7 +1,8 @@
 import os
 import logging
 import replicate
-from flask import Flask, request, jsonify, render_template, flash, redirect, url_for
+import requests
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
@@ -16,6 +17,8 @@ load_dotenv()
 # Ensure Replicate API token is set
 if not os.getenv("REPLICATE_API_TOKEN"):
     logging.warning("REPLICATE_API_TOKEN not found in environment variables")
+else:
+    os.environ["REPLICATE_API_TOKEN"] = os.getenv("REPLICATE_API_TOKEN")
 
 # Configure application
 app = Flask(__name__)
@@ -37,6 +40,16 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def upload_image_to_fileio(image_path):
+    """Upload an image to file.io and return the URL"""
+    try:
+        with open(image_path, "rb") as f:
+            response = requests.post("https://file.io", files={"file": f})
+            return response.json().get("link")
+    except Exception as e:
+        logging.error(f"Error uploading to file.io: {str(e)}")
+        return None
+
 @app.route('/')
 def index():
     """Render the main page"""
@@ -44,7 +57,7 @@ def index():
 
 @app.route('/generate', methods=['POST'])
 def generate():
-    """Process image upload and generate Naruto style image"""
+    """Process image upload and transform image"""
     # Check if file was submitted
     if 'image' not in request.files:
         return jsonify({'error': 'No file part'}), 400
@@ -67,22 +80,25 @@ def generate():
         
         logging.debug(f"Image saved at {filepath}")
         
+        # Upload image to file.io to get a public URL
+        image_url = upload_image_to_fileio(filepath)
+        if not image_url:
+            return jsonify({'error': 'Image upload failed'}), 500
+        
         # Process the image using the Replicate API
         try:
             output = replicate.run(
-                "bytedance/pulid",
+                "bytedance/pulid:43d309c37ab4e62361e5e29b8e9e867fb2dcbcec77ae91206a8d95ac5dd451a0",
                 input={
-                    "image": open(filepath, "rb"),
                     "prompt": "Fantasy character style, close-up portrait, detailed features, vibrant colors, sharp lines, 1024x1024",
-                    "guidance_scale": 7.5,
-                    "num_inference_steps": 50
+                    "main_face_image": image_url
                 }
             )
             
             logging.debug(f"Transformation result: {output}")
             
             # Return the URL of the generated image
-            return jsonify({'image_url': output, 'status': 'success'})
+            return jsonify({'image_url': output[0] if isinstance(output, list) else output, 'status': 'success'})
             
         except Exception as e:
             logging.error(f"Error during transformation: {str(e)}")
