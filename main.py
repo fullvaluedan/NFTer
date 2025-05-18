@@ -60,7 +60,15 @@ def generate_image():
             }
         )
         print(f"✅ Output received: {output}")
-        return jsonify({"image_urls": output})
+        
+        # Convert the FileOutput objects to URLs
+        if isinstance(output, list):
+            output_urls = [str(url) for url in output]
+        else:
+            output_urls = [str(output)]
+            
+        print(f"✅ Output URLs: {output_urls}")
+        return jsonify({"image_urls": output_urls})
         
     except Exception as e:
         error_message = str(e)
