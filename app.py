@@ -15,10 +15,11 @@ logging.basicConfig(level=logging.DEBUG)
 load_dotenv()
 
 # Ensure Replicate API token is set
-if not os.getenv("REPLICATE_API_TOKEN"):
+replicate_token = os.getenv("REPLICATE_API_TOKEN")
+if not replicate_token:
     logging.warning("REPLICATE_API_TOKEN not found in environment variables")
 else:
-    os.environ["REPLICATE_API_TOKEN"] = os.getenv("REPLICATE_API_TOKEN")
+    os.environ["REPLICATE_API_TOKEN"] = replicate_token
 
 # Configure application
 app = Flask(__name__)
@@ -68,8 +69,12 @@ def generate():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     
+    # Check if file exists and has filename
+    if not file or not file.filename:
+        return jsonify({'error': 'No valid file selected'}), 400
+        
     # Check if file is allowed
-    if not (file and allowed_file(file.filename)):
+    if not allowed_file(file.filename):
         return jsonify({'error': 'File type not allowed. Please upload an image (PNG, JPG, JPEG, GIF)'}), 400
     
     try:

@@ -2,12 +2,14 @@
 import os
 import replicate
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 
 load_dotenv()
-os.environ["REPLICATE_API_TOKEN"] = os.getenv("REPLICATE_API_TOKEN")
+replicate_token = os.getenv("REPLICATE_API_TOKEN")
+if replicate_token:
+    os.environ["REPLICATE_API_TOKEN"] = replicate_token
 
 app = Flask(__name__)
 CORS(app)
@@ -19,7 +21,7 @@ def upload_image_to_fileio(image_path):
 
 @app.route("/")
 def home():
-    return "NFTer is Running"
+    return render_template("index.html")
 
 @app.route("/generate", methods=["POST"])
 def generate_image():

@@ -1,76 +1,129 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFTer</title>
-    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFTer - AI Portrait Generator</title>
+  <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+  <style>
+    .result-image {
+      max-width: 100%;
+      margin-top: 15px;
+      border-radius: 8px;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #0dcaf0;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <header class="mb-5 text-center">
-                    <h1 class="mb-3 nfter-header">NFTer</h1>
-                    <p class="lead">Add yourself to any community</p>
-                </header>
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <header class="mb-5 text-center">
+          <h1 class="mb-3 text-warning">NFTer</h1>
+          <p class="lead">Add yourself to any community</p>
+        </header>
 
-                <div class="card bg-dark border-info mb-4">
-                    <div class="card-body">
-                        <form id="upload-form" enctype="multipart/form-data">
-                            <div id="drop-zone" class="drop-zone mb-3">
-                                <div id="instructions">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-cloud-arrow-up mb-3 text-info" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2z"/>
-                                        <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1v-.001z"/>
-                                    </svg>
-                                    <h5>Drag & Drop your image here</h5>
-                                    <p class="text-muted">or click to browse</p>
-                                    <p class="instructions">Supported formats: PNG, JPG, JPEG, GIF</p>
-                                </div>
-                                <input type="file" id="file-input" name="image" accept="image/*" class="hidden">
-                            </div>
-                            
-                            <div id="preview-container" class="text-center mb-3 hidden">
-                                <h5 class="mb-3">Preview</h5>
-                                <img id="image-preview" class="image-preview mb-3" src="" alt="Preview">
-                                <button id="generate-btn" type="submit" class="btn btn-warning w-100">
-                                    Transform Image
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <div id="loading-spinner" class="text-center hidden">
-                            <p>Transforming your image into Naruto style...</p>
-                            <div class="loader"></div>
-                            <p class="text-muted">This might take up to a minute depending on the image size.</p>
-                        </div>
-                        
-                        <div id="error-message" class="alert alert-danger text-center hidden"></div>
-                        
-                        <div id="result-container" class="text-center hidden">
-                            <h5 class="mb-3">Your Transformed Image</h5>
-                            <img id="result-image" class="result-image mb-3" src="" alt="Transformed Image">
-                            <div class="d-grid gap-2">
-                                <a id="download-btn" class="btn btn-success mb-2" href="#" download>Download Image</a>
-                                <button id="try-again-btn" class="btn btn-outline-info">Try Another Image</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-dark border-secondary">
-                    <div class="card-body">
-                        <h5 class="card-title">About this tool</h5>
-                        <p class="card-text">This tool uses advanced AI technology to transform your photos and add you to any community. The transformation is powered by the Replicate API and cutting-edge image generation models.</p>
-                        <p class="card-text">The process may take some time depending on the complexity of your image and the current server load.</p>
-                    </div>
-                </div>
+        <div class="card bg-dark border-info mb-4">
+          <div class="card-body">
+            <form id="upload-form" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label for="image" class="form-label">Select an image to transform</label>
+                <input class="form-control" type="file" id="image" name="image" accept="image/*" required>
+              </div>
+              <button type="submit" class="btn btn-warning w-100">Transform Image</button>
+            </form>
+            
+            <div id="loading" class="loading">
+              <p>Transforming your image...</p>
+              <div class="loader"></div>
+              <p class="text-muted">This might take up to a minute depending on the image size.</p>
             </div>
+            
+            <div id="result" class="mt-4 text-center"></div>
+          </div>
         </div>
+        
+        <div class="card bg-dark border-secondary">
+          <div class="card-body">
+            <h5 class="card-title">About this tool</h5>
+            <p class="card-text">This tool uses advanced AI technology to transform your photos and add you to any community. The transformation is powered by cutting-edge image generation models.</p>
+            <p class="card-text">The process may take some time depending on the complexity of your image and the current server load.</p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    document.getElementById("upload-form").onsubmit = async (e) => {
+      e.preventDefault();
+      
+      // Show loading state
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("result").innerHTML = "";
+      
+      const formData = new FormData(e.target);
+      
+      try {
+        const res = await fetch("/generate", {
+          method: "POST",
+          body: formData
+        });
+        
+        const data = await res.json();
+        
+        // Hide loading state
+        document.getElementById("loading").style.display = "none";
+        
+        if (data.error) {
+          document.getElementById("result").innerHTML = `
+            <div class="alert alert-danger">${data.error}</div>
+          `;
+        } else {
+          // Handle the response based on whether it's an array or single URL
+          const images = Array.isArray(data.image_urls) ? data.image_urls : [data.image_urls];
+          
+          let resultHTML = `<h5 class="mb-3">Your Transformed Image</h5>`;
+          images.forEach(url => {
+            resultHTML += `
+              <div class="mb-3">
+                <img src="${url}" class="result-image" alt="Transformed Image">
+                <div class="mt-2">
+                  <a href="${url}" class="btn btn-success btn-sm" download target="_blank">Download Image</a>
+                </div>
+              </div>
+            `;
+          });
+          
+          document.getElementById("result").innerHTML = resultHTML;
+        }
+      } catch (error) {
+        // Hide loading state
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("result").innerHTML = `
+          <div class="alert alert-danger">An error occurred while processing your request. Please try again.</div>
+        `;
+      }
+    };
+  </script>
 </body>
 </html>
