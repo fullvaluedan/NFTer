@@ -73,7 +73,7 @@ def generate():
                 "bytedance/pulid",
                 input={
                     "image": open(filepath, "rb"),
-                    "prompt": "Naruto anime style, close-up portrait, ninja headband, spiky hair, sharp lines, 1024x1024",
+                    "prompt": "Fantasy character style, close-up portrait, detailed features, vibrant colors, sharp lines, 1024x1024",
                     "guidance_scale": 7.5,
                     "num_inference_steps": 50
                 }

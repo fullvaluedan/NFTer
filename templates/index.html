@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Naruto Style Image Generator</title>
+    <title>NFTer</title>
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -12,8 +12,8 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <header class="mb-5 text-center">
-                    <h1 class="mb-3 naruto-header">Naruto Style Image Generator</h1>
-                    <p class="lead">Transform your photos into Naruto anime style using AI</p>
+                    <h1 class="mb-3 nfter-header">NFTer</h1>
+                    <p class="lead">Add yourself to any community</p>
                 </header>
 
                 <div class="card bg-dark border-info mb-4">
@@ -36,7 +36,7 @@
                                 <h5 class="mb-3">Preview</h5>
                                 <img id="image-preview" class="image-preview mb-3" src="" alt="Preview">
                                 <button id="generate-btn" type="submit" class="btn btn-warning w-100">
-                                    Generate Naruto Style
+                                    Transform Image
                                 </button>
                             </div>
                         </form>
@@ -50,8 +50,8 @@
                         <div id="error-message" class="alert alert-danger text-center hidden"></div>
                         
                         <div id="result-container" class="text-center hidden">
-                            <h5 class="mb-3">Your Naruto Style Image</h5>
-                            <img id="result-image" class="result-image mb-3" src="" alt="Naruto Style Image">
+                            <h5 class="mb-3">Your Transformed Image</h5>
+                            <img id="result-image" class="result-image mb-3" src="" alt="Transformed Image">
                             <div class="d-grid gap-2">
                                 <a id="download-btn" class="btn btn-success mb-2" href="#" download>Download Image</a>
                                 <button id="try-again-btn" class="btn btn-outline-info">Try Another Image</button>
@@ -63,7 +63,7 @@
                 <div class="card bg-dark border-secondary">
                     <div class="card-body">
                         <h5 class="card-title">About this tool</h5>
-                        <p class="card-text">This tool uses advanced AI technology to transform your photos into Naruto anime style. The transformation is powered by the Replicate API and the bytedance/pulid model.</p>
+                        <p class="card-text">This tool uses advanced AI technology to transform your photos and add you to any community. The transformation is powered by the Replicate API and cutting-edge image generation models.</p>
                         <p class="card-text">The process may take some time depending on the complexity of your image and the current server load.</p>
                     </div>
                 </div>
