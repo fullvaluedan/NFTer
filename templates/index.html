@@ -46,6 +46,21 @@
           <div class="card-body">
             <form id="upload-form" enctype="multipart/form-data">
               <div class="mb-3">
+                <label for="role-select" class="form-label">Choose a role (or leave random)</label>
+                <select class="form-select" id="role-select" name="selected_role">
+                  <option value="">Random (weighted)</option>
+                  <option>Anbu Black Ops</option>
+                  <option>Rogue ninja</option>
+                  <option>Akatsuki member</option>
+                  <option>young Genin</option>
+                  <option>Chūnin</option>
+                  <option>elite Jōnin</option>
+                  <option>Hidden Leaf teacher</option>
+                  <option>Hokage</option>
+                  <option>civilian villager</option>
+                </select>
+              </div>
+              <div class="mb-3">
                 <label for="image" class="form-label">Select an image to transform</label>
                 <input class="form-control" type="file" id="image" name="image" accept="image/*" required>
               </div>

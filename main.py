@@ -42,29 +42,41 @@ def home():
 @app.route("/generate", methods=["POST"])
 def generate_image():
     roles = [
-        {"label": "Anbu Black Ops", "description": "covert elite ninja unit", "visual": "wearing a porcelain animal mask, black tactical armor, and surrounded by mist"},
-        {"label": "Rogue ninja", "description": "banished or runaway ninja", "visual": "wearing a scratched headband, a torn cloak, and a grim expression"},
-        {"label": "Akatsuki member", "description": "member of a notorious rogue group", "visual": "wearing a black cloak with red clouds, intense stare, and cloudy background"},
-        {"label": "young Genin", "description": "newly graduated ninja", "visual": "wearing a simple forehead protector, utility vest, and determined eyes"},
-        {"label": "Chūnin", "description": "mid-ranked field ninja", "visual": "wearing a green vest, tactical gear, and calm focus"},
-        {"label": "elite Jōnin", "description": "top-ranked ninja", "visual": "wearing a high-collared flak jacket, gloves, and a strong, confident look"},
-        {"label": "Hidden Leaf teacher", "description": "academy instructor", "visual": "wearing robes and holding a scroll, with a warm smile"},
-        {"label": "Hokage", "description": "leader of the village", "visual": "wearing white and red robes and hat, standing with a commanding presence"},
-        {"label": "civilian villager", "description": "non-ninja resident", "visual": "wearing plain clothes in earthy colors, with a peaceful expression"}
+        { "label": "civilian villager", "weight": 40, "score": (5, 35), "description": "non-ninja resident", "visual": "wearing plain clothes in earthy colors, with a peaceful expression", "prompt": "Anime character, close-up portrait. Wearing simple earth-toned tunic, no headband, calm and peaceful expression. Background is a village market with wooden buildings and hanging signs, blurred for focus." },
+        { "label": "young Genin", "weight": 20, "score": (30, 55), "description": "newly graduated ninja", "visual": "wearing a simple forehead protector, utility vest, and determined eyes", "prompt": "Anime character, close-up head and shoulders. Wearing dark shirt, headband on forehead, fingerless gloves, hopeful youthful look. Background is forest training field, lightly blurred." },
+        { "label": "Chūnin", "weight": 15, "score": (45, 65), "description": "mid-ranked field ninja", "visual": "wearing a green vest, tactical gear, and calm focus", "prompt": "Anime close-up. Wears tactical green vest, small utility pouch, confident smile. Headband visible. Background shows a mission gate entrance, subtle and soft-blurred." },
+        { "label": "elite Jōnin", "weight": 10, "score": (55, 75), "description": "top-ranked ninja", "visual": "wearing a high-collared flak jacket, gloves, and a strong, confident look", "prompt": "Close-up anime portrait. Wearing reinforced flak jacket, scars or facial detail, strong expression, one eyebrow slightly raised. Background is a distant mountain range near the village border." },
+        { "label": "Rogue ninja", "weight": 4, "score": (60, 80), "description": "banished or runaway ninja", "visual": "wearing a scratched headband, a torn cloak, and a grim expression", "prompt": "Anime portrait, close-up with gritty details. Scratched forehead protector worn like a bandana, torn dark cloak, rebellious eyes. Background: moody ruined bridge or rocky canyon, blurred for depth." },
+        { "label": "Akatsuki member", "weight": 3, "score": (75, 95), "description": "member of a notorious rogue group", "visual": "wearing a black cloak with red clouds, intense stare, and cloudy background", "prompt": "Anime portrait. Black cloak with red clouds, serious or evil expression, headband slashed, red-tinted eyes. Background: stormy sky with broken pillars, slightly blurred." },
+        { "label": "Anbu Black Ops", "weight": 3, "score": (70, 90), "description": "covert elite ninja unit", "visual": "wearing a porcelain animal mask, black tactical armor, and surrounded by mist", "prompt": "Close-up anime character. Tactical armor, headband, fox or cat mask clipped to side of waist or held in hand. Background: mist-covered rooftops at night, faded for depth." },
+        { "label": "Hidden Leaf teacher", "weight": 3, "score": (50, 70), "description": "academy instructor", "visual": "wearing robes and holding a scroll, with a warm smile", "prompt": "Anime portrait with kind face, wearing long-sleeve tunic and scroll belt. Holding chalk or book, eyes slightly smiling. Background: academy classroom or wooden fence with training targets." },
+        { "label": "Hokage", "weight": 2, "score": (90, 100), "description": "leader of the village", "visual": "wearing white and red robes and hat, standing with a commanding presence", "prompt": "Anime close-up. Wearing red and white robes, headpiece present or stylized. Calm, wise smile. Background shows blurred monument or paper window with sunlight rays." }
     ]
-    selected = random.choice(roles)
+    
+    role_lookup = {r["label"]: r for r in roles}
+    weights = [r["weight"] for r in roles]
+    
+    manual_label = request.form.get("selected_role")
+    if manual_label and manual_label in role_lookup:
+        selected = role_lookup[manual_label]
+    else:
+        selected = random.choices(roles, weights=weights, k=1)[0]
+        
     selected_role = selected["label"]
     role_desc = selected["description"]
     visual_traits = selected["visual"]
-    prompt_text = f"""
-    Convert this person into an anime character drawn in a fantasy anime style. Preserve the person's facial structure and expression. Use cel-shaded coloring, bold black outlines, and expressive anime-style eyes.
+    prompt_text = selected["prompt"]
+    # Use either the provided prompt or fall back to a detailed one
+    if not prompt_text or prompt_text.strip() == "":
+        prompt_text = f"""
+        Convert this person into an anime character drawn in a fantasy anime style. Preserve the person's facial structure and expression. Use cel-shaded coloring, bold black outlines, and expressive anime-style eyes.
 
-    This character is a {selected_role} ({role_desc}). They are {visual_traits}.
+        This character is a {selected_role} ({role_desc}). They are {visual_traits}.
 
-    Use vibrant anime-style coloring. Do not use grayscale. The composition should be centered, zoomed-in, and clean. Crop the image to a close-up portrait focused on the face and shoulders only. Avoid full body shots or wide angles.
+        Use vibrant anime-style coloring. Do not use grayscale. The composition should be centered, zoomed-in, and clean. Crop the image to a close-up portrait focused on the face and shoulders only. Avoid full body shots or wide angles.
 
-    Use a minimal anime-style background that complements the character. Blur it slightly to keep focus on the character. Final output must be 1024x1024 resolution in full color.
-    """
+        Use a minimal anime-style background that complements the character. Blur it slightly to keep focus on the character. Final output must be 1024x1024 resolution in full color.
+        """
 
     if 'image' not in request.files:
         return jsonify({"error": "No image file provided"}), 400
@@ -99,18 +111,7 @@ def generate_image():
         print(f"✅ Output URLs: {output_urls}")
 
         def score_for(role):
-            weights = {
-                "civilian villager": (0, 40),
-                "young Genin": (30, 60),
-                "Chūnin": (40, 70),
-                "elite Jōnin": (60, 85),
-                "Anbu Black Ops": (70, 90),
-                "Rogue ninja": (60, 90),
-                "Akatsuki member": (80, 100),
-                "Hidden Leaf teacher": (50, 80),
-                "Hokage": (90, 100)
-            }
-            low, high = weights.get(selected_role, (30, 70))
+            low, high = selected["score"]
             return random.randint(low, high)
 
         scores = [score_for(selected_role) for _ in output_urls]

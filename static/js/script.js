@@ -99,6 +99,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('image', fileInput.files[0]);
         
+        // Add selected role if available
+        const roleSelect = document.getElementById('role-select');
+        if (roleSelect && roleSelect.value) {
+            formData.append('selected_role', roleSelect.value);
+        }
+        
         // Show loading state
         loadingSpinner.classList.remove('hidden');
         errorMessage.classList.add('hidden');
@@ -122,13 +128,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Hide loading state
             loadingSpinner.classList.add('hidden');
             
-            // Show result
-            resultImage.src = data.image_url;
+            // Show result - use the first image if multiple are returned
+            const imageUrl = data.image_urls ? data.image_urls[0] : data.image_url;
+            resultImage.src = imageUrl;
             resultContainer.classList.remove('hidden');
             
             // Set download link
-            downloadBtn.href = data.image_url;
-            downloadBtn.download = 'naruto-style-image.png';
+            downloadBtn.href = imageUrl;
+            downloadBtn.download = 'nfter-anime-character.png';
             
             generateBtn.disabled = false;
         })
