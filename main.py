@@ -21,7 +21,14 @@ def upload_to_replicate(image_path):
             files={"file": f},
             headers={"Authorization": f"Token {os.environ['REPLICATE_API_TOKEN']}"}
         )
-        return response.json()["upload_url"]
+    try:
+        data = response.json()
+        print("📦 Response:", data)
+    except Exception as e:
+        print("❌ Failed to decode JSON:", e)
+        print("📦 Raw response:", response.text)
+        return None
+    return data.get("upload_url")
 
 @app.route("/")
 def home():
@@ -29,25 +36,55 @@ def home():
 
 @app.route("/generate", methods=["POST"])
 def generate_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+    
     image_file = request.files["image"]
+    if not image_file or image_file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    
+    # Save the uploaded file
     image_path = "input.jpg"
     image_file.save(image_path)
+    print(f"✅ Image saved successfully at {image_path}")
 
     try:
-        image_url = upload_to_replicate(image_path)
-        if not image_url:
-            return jsonify({"error": "Image upload failed"}), 500
-
+        # Try using the Replicate API directly with the file
+        print("🔄 Running Replicate API with local file...")
         output = replicate.run(
             "bytedance/pulid:43d309c37ab4e62361e5e29b8e9e867fb2dcbcec77ae91206a8d95ac5dd451a0",
             input={
                 "prompt": "Fantasy character style, close-up portrait, detailed features, vibrant colors, sharp lines, 1024x1024",
-                "main_face_image": image_url
+                "image": open(image_path, "rb")
             }
         )
+        print(f"✅ Output received: {output}")
+        return jsonify({"image_urls": output})
+        
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({"error": f"Error processing image: {str(e)}"}), 500
-
-    return jsonify({"image_urls": output})
+        error_message = str(e)
+        print(f"❌ Error: {error_message}")
+        
+        # If there's an issue with direct file upload, try the upload_to_replicate method
+        try:
+            print("🔄 Attempting alternative upload method...")
+            image_url = upload_to_replicate(image_path)
+            if not image_url:
+                return jsonify({"error": "Image upload failed"}), 500
+                
+            print(f"✅ Image uploaded successfully, URL: {image_url}")
+            
+            output = replicate.run(
+                "bytedance/pulid:43d309c37ab4e62361e5e29b8e9e867fb2dcbcec77ae91206a8d95ac5dd451a0",
+                input={
+                    "prompt": "Fantasy character style, close-up portrait, detailed features, vibrant colors, sharp lines, 1024x1024",
+                    "main_face_image": image_url
+                }
+            )
+            print(f"✅ Output received: {output}")
+            return jsonify({"image_urls": output})
+            
+        except Exception as inner_e:
+            print(f"❌ Alternative method failed: {str(inner_e)}")
+            return jsonify({"error": f"Failed to process image: {error_message}. Alternative method also failed: {str(inner_e)}"}), 500
 
