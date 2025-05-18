@@ -99,6 +99,7 @@
             <div class="alert alert-danger">${data.error}</div>
           `;
         } else {
+          // Handle the response based on whether it's an array or single URL
           const images = Array.isArray(data.image_urls) ? data.image_urls : [data.image_urls];
           const role = data.role || "fantasy character";
           const scores = data.scores || Array(images.length).fill(50);
@@ -123,7 +124,7 @@
                   <div class="mb-3">
                     <h6>Power Level: ${score}%</h6>
                     <div class="progress" style="height: 10px;">
-                      <div class="progress-bar ${scoreClass}" role="progressbar" style="width: ${score}%"
+                      <div class="progress-bar ${scoreClass}" role="progressbar" style="width: ${score}%" 
                         aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                   </div>
@@ -138,6 +139,7 @@
           document.getElementById("result").innerHTML = resultHTML;
         }
       } catch (error) {
+        // Hide loading state
         document.getElementById("loading").style.display = "none";
         document.getElementById("result").innerHTML = `
           <div class="alert alert-danger">An error occurred while processing your request. Please try again.</div>

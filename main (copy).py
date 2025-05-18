@@ -41,30 +41,58 @@ def home():
 
 @app.route("/generate", methods=["POST"])
 def generate_image():
-    roles = [
-        {"label": "Anbu Black Ops", "description": "covert elite ninja unit", "visual": "wearing a porcelain animal mask, black tactical armor, and surrounded by mist"},
-        {"label": "Rogue ninja", "description": "banished or runaway ninja", "visual": "wearing a scratched headband, a torn cloak, and a grim expression"},
-        {"label": "Akatsuki member", "description": "member of a notorious rogue group", "visual": "wearing a black cloak with red clouds, intense stare, and cloudy background"},
-        {"label": "young Genin", "description": "newly graduated ninja", "visual": "wearing a simple forehead protector, utility vest, and determined eyes"},
-        {"label": "Chūnin", "description": "mid-ranked field ninja", "visual": "wearing a green vest, tactical gear, and calm focus"},
-        {"label": "elite Jōnin", "description": "top-ranked ninja", "visual": "wearing a high-collared flak jacket, gloves, and a strong, confident look"},
-        {"label": "Hidden Leaf teacher", "description": "academy instructor", "visual": "wearing robes and holding a scroll, with a warm smile"},
-        {"label": "Hokage", "description": "leader of the village", "visual": "wearing white and red robes and hat, standing with a commanding presence"},
-        {"label": "civilian villager", "description": "non-ninja resident", "visual": "wearing plain clothes in earthy colors, with a peaceful expression"}
-    ]
+    roles = [{
+        "label":
+        "civilian villager",
+        "description":
+        "wearing modest clothes in browns or greens, soft smile, no headband, background of wooden buildings"
+    }, {
+        "label":
+        "young Genin",
+        "description":
+        "Leaf headband, fingerless gloves, basic ninja outfit, hopeful look, trees in the background"
+    }, {
+        "label":
+        "Chūnin",
+        "description":
+        "green flak jacket, confident expression, short cropped hair, mission-ready"
+    }, {
+        "label":
+        "elite Jōnin",
+        "description":
+        "ninja headband with battle-ready gear, focused intense eyes, scars or facial detail"
+    }, {
+        "label":
+        "Anbu Black Ops",
+        "description":
+        "animal mask covering face, dark armor, mysterious vibe, misty background"
+    }, {
+        "label":
+        "Rogue ninja",
+        "description":
+        "scratched headband, torn cloak, rebellious eyes, cloudy background"
+    }, {
+        "label":
+        "Akatsuki member",
+        "description":
+        "black cloak with red clouds, intense expression, rainy or moody background"
+    }, {
+        "label":
+        "Hidden Leaf teacher",
+        "description":
+        "casual outfit with clipboard or scroll, warm friendly expression, classroom setting"
+    }, {
+        "label":
+        "Hokage",
+        "description":
+        "traditional Hokage robes, formal headpiece, wise expression, background of stone faces"
+    }]
     selected = random.choice(roles)
     selected_role = selected["label"]
     role_desc = selected["description"]
-    visual_traits = selected["visual"]
-    prompt_text = f"""
-    Convert this person into an anime character drawn in a fantasy anime style. Preserve the person's facial structure and expression. Use cel-shaded coloring, bold black outlines, and expressive anime-style eyes.
+    prompt_text = f"""Convert this person into a Naruto anime character drawn in the exact style of the Naruto anime. Preserve the person's facial structure. Make it a 2D close-up portrait.
 
-    This character is a {selected_role} ({role_desc}). They are {visual_traits}.
-
-    Use vibrant anime-style coloring. Do not use grayscale. The composition should be centered, zoomed-in, and clean. Crop the image to a close-up portrait focused on the face and shoulders only. Avoid full body shots or wide angles.
-
-    Use a minimal anime-style background that complements the character. Blur it slightly to keep focus on the character. Final output must be 1024x1024 resolution in full color.
-    """
+    This character is a {selected_role} from the Hidden Leaf Village — {role_desc}. Use clothing, accessories, and colors inspired by Naruto character designs (e.g., ninja vests, headbands, cloaks). The background should be soft, in the style of traditional Naruto scenes like villages, forests, or training fields. Use bright lighting, simple textures, and a slight blur. Image should be 1024x1024 pixels."""
 
     if 'image' not in request.files:
         return jsonify({"error": "No image file provided"}), 400
