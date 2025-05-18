@@ -19,7 +19,7 @@ def upload_image_to_fileio(image_path):
 
 @app.route("/")
 def home():
-    return "Naruto Generator is Running"
+    return "NFTer is Running"
 
 @app.route("/generate", methods=["POST"])
 def generate_image():
@@ -34,7 +34,7 @@ def generate_image():
     output = replicate.run(
         "bytedance/pulid:43d309c37ab4e62361e5e29b8e9e867fb2dcbcec77ae91206a8d95ac5dd451a0",
         input={
-            "prompt": "Naruto anime style, close-up portrait, ninja headband, sharp lines, glowing eyes",
+            "prompt": "Fantasy character style, close-up portrait, detailed features, vibrant colors, sharp lines, 1024x1024",
             "main_face_image": image_url
         }
     )
