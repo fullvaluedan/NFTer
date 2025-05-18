@@ -1,0 +1,78 @@
+/* Custom styles for Naruto Image Generator */
+
+.hidden {
+  display: none !important;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.result-image {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.drop-zone {
+  border: 2px dashed var(--bs-info);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background-color: rgba(13, 202, 240, 0.1);
+  cursor: pointer;
+}
+
+.drop-zone:hover {
+  background-color: rgba(13, 202, 240, 0.2);
+}
+
+.drop-zone.active {
+  border-color: var(--bs-success);
+  background-color: rgba(25, 135, 84, 0.1);
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid var(--bs-info);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.naruto-header {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  color: var(--bs-warning);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.instructions {
+  font-size: 0.9rem;
+  color: var(--bs-light);
+}
+
+.error-message {
+  color: var(--bs-danger);
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
