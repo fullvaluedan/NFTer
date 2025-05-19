@@ -1,13 +1,13 @@
 'use client';
 
-import { useCurrentWallet } from '@mysten/dapp-kit';
+import { useSuiClientContext } from '@mysten/dapp-kit';
 import { Button } from './ui/button';
 import Link from 'next/link';
 
 export function NetworkSwitcher() {
-  const { currentWallet } = useCurrentWallet();
+  const { network } = useSuiClientContext();
 
-  if (!currentWallet) return null;
+  if (!network) return null;
 
   return (
     <Link href="/wallet">

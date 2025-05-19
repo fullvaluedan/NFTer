@@ -1,16 +1,12 @@
 'use client';
 
-import { useCurrentAccount, useCurrentWallet, useSuiClientQuery, useSuiClientContext } from '@mysten/dapp-kit';
+import { useCurrentAccount, useCurrentWallet, useSuiClientQuery, useSuiClientContext, ConnectButton } from '@mysten/dapp-kit';
 import { SLUSH_WALLET_NAME } from '@mysten/slush-wallet';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { ConnectButton } from '@mysten/dapp-kit';
-
-interface ConnectButtonProps {
-  connecting: boolean;
-  connected: boolean;
-  disconnect: () => void;
-}
+import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 function NetworkSelector() {
   const ctx = useSuiClientContext();
@@ -35,6 +31,49 @@ function NetworkSelector() {
   );
 }
 
+function FaucetRequest() {
+  const account = useCurrentAccount();
+  const { network: currentNetwork } = useSuiClientContext();
+  const [isRequesting, setIsRequesting] = useState(false);
+
+  const handleRequest = async () => {
+    if (!account) return;
+    
+    try {
+      setIsRequesting(true);
+      await requestSuiFromFaucetV2({
+        host: getFaucetHost(currentNetwork as 'testnet' | 'devnet' | 'localnet'),
+        recipient: account.address,
+      });
+      toast.success('Successfully requested SUI from faucet');
+    } catch (error) {
+      console.error('Failed to request from faucet:', error);
+      toast.error('Failed to request SUI from faucet');
+    } finally {
+      setIsRequesting(false);
+    }
+  };
+
+  // Only show faucet for testnet and devnet
+  if (!['testnet', 'devnet'].includes(currentNetwork)) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <h3 className="text-sm font-medium text-muted-foreground">Request Test SUI</h3>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleRequest}
+        disabled={isRequesting}
+      >
+        {isRequesting ? 'Requesting...' : 'Request from Faucet'}
+      </Button>
+    </div>
+  );
+}
+
 export function WalletDetails() {
   const account = useCurrentAccount();
   const { currentWallet } = useCurrentWallet();
@@ -55,17 +94,7 @@ export function WalletDetails() {
           <CardDescription>Connect your wallet to view details</CardDescription>
         </CardHeader>
         <CardContent>
-          <ConnectButton>
-            {({ connecting, connected, disconnect }: ConnectButtonProps) => (
-              <Button 
-                variant="outline" 
-                onClick={connected ? disconnect : undefined}
-                disabled={connecting}
-              >
-                {connecting ? 'Connecting...' : connected ? 'Disconnect' : 'Connect Wallet'}
-              </Button>
-            )}
-          </ConnectButton>
+          <ConnectButton />
         </CardContent>
       </Card>
     );
@@ -115,8 +144,9 @@ export function WalletDetails() {
           <CardTitle>Network Selection</CardTitle>
           <CardDescription>Switch between available networks</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <NetworkSelector />
+          <FaucetRequest />
         </CardContent>
       </Card>
 
@@ -127,17 +157,7 @@ export function WalletDetails() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
-            <ConnectButton>
-              {({ connecting, connected, disconnect }: ConnectButtonProps) => (
-                <Button 
-                  variant="outline" 
-                  onClick={connected ? disconnect : undefined}
-                  disabled={connecting}
-                >
-                  {connecting ? 'Connecting...' : connected ? 'Disconnect' : 'Connect Wallet'}
-                </Button>
-              )}
-            </ConnectButton>
+            <ConnectButton />
           </div>
         </CardContent>
       </Card>

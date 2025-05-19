@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -251,29 +252,30 @@ export default function Home() {
               <div className="text-center">
                 <Carousel className="mx-auto max-w-[400px]">
                   <CarouselContent>
-                    {generatedImages.map((image, index) => (
+                    {generatedImages.map((imageUrl, index) => (
                       <CarouselItem key={index}>
-                        <div className="p-1">
-                          <img
-                            src={image}
-                            alt={`Generated Avatar ${index + 1}`}
-                            className="mx-auto max-h-[400px] w-auto rounded-lg object-contain"
-                            onError={(e) => {
-                              console.error("Image failed to load:", image)
-                              toast.error("Failed to load image. Please try again.")
-                            }}
+                        <div className="relative aspect-square">
+                          <Image
+                            src={imageUrl}
+                            alt={`Generated avatar ${index + 1}`}
+                            fill
+                            className="object-cover rounded-lg"
                           />
-                          {imageScores[index] && (
-                            <div className="mt-4">
-                              <h6 className="mb-2">Power Level: {imageScores[index]}%</h6>
-                              <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-                                <div
-                                  className={`h-full ${getScoreColor(imageScores[index])} transition-all duration-500`}
-                                  style={{ width: `${imageScores[index]}%` }}
-                                />
-                              </div>
-                            </div>
-                          )}
+                        </div>
+                        <div className="mt-2 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${getScoreColor(imageScores[index])}`} />
+                            <span className="text-sm text-muted-foreground">
+                              Score: {imageScores[index]}
+                            </span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(imageUrl, '_blank')}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
                         </div>
                       </CarouselItem>
                     ))}

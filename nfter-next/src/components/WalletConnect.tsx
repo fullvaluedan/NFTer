@@ -2,14 +2,7 @@
 
 import { ConnectButton, useCurrentAccount, useCurrentWallet, useSuiClientQuery } from '@mysten/dapp-kit';
 import { SLUSH_WALLET_NAME } from '@mysten/slush-wallet';
-import { Button } from './ui/button';
 import { NetworkSwitcher } from './NetworkSwitcher';
-
-interface ConnectButtonProps {
-  connecting: boolean;
-  connected: boolean;
-  disconnect: () => void;
-}
 
 export function WalletConnect() {
   const account = useCurrentAccount();
@@ -36,17 +29,7 @@ export function WalletConnect() {
           <ConnectButton className="!bg-blue-600 hover:!bg-blue-700" />
         </div>
       ) : (
-        <ConnectButton>
-          {({ connecting, connected, disconnect }: ConnectButtonProps) => (
-            <Button 
-              variant="outline" 
-              onClick={connected ? disconnect : undefined}
-              disabled={connecting}
-            >
-              {connecting ? 'Connecting...' : connected ? 'Disconnect' : 'Connect Wallet'}
-            </Button>
-          )}
-        </ConnectButton>
+        <ConnectButton className="!bg-blue-600 hover:!bg-blue-700" />
       )}
     </div>
   );
