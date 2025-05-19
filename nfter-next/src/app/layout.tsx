@@ -4,6 +4,7 @@ import "./globals.css";
 import "@mysten/dapp-kit/dist/index.css";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/Providers";
+import { WalletConnect } from "@/components/WalletConnect";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
               <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
                   <h1 className="text-2xl font-bold text-blue-600">NFTer</h1>
+                  <WalletConnect />
                 </div>
               </div>
             </header>

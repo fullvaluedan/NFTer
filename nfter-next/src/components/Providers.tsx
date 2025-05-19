@@ -33,9 +33,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
             name: 'NFTer'
           }}
         >
-          <div className="flex items-center justify-between">
-            <WalletConnect />
-          </div>
           {children}
         </WalletProvider>
       </SuiClientProvider>
