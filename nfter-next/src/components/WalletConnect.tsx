@@ -1,8 +1,9 @@
 'use client';
 
-import { ConnectButton, useCurrentAccount, useCurrentWallet } from '@mysten/dapp-kit';
+import { ConnectButton, useCurrentAccount, useCurrentWallet, useSuiClientQuery } from '@mysten/dapp-kit';
 import { SLUSH_WALLET_NAME } from '@mysten/slush-wallet';
 import { Button } from './ui/button';
+import { NetworkSwitcher } from './NetworkSwitcher';
 
 interface ConnectButtonProps {
   connecting: boolean;
@@ -14,6 +15,9 @@ export function WalletConnect() {
   const account = useCurrentAccount();
   const { currentWallet } = useCurrentWallet();
   const isSlushWallet = currentWallet?.name === SLUSH_WALLET_NAME;
+  
+  // Get detailed network info
+  const { data: chainId } = useSuiClientQuery('getChainIdentifier');
 
   return (
     <div className="flex items-center gap-4">
@@ -21,8 +25,14 @@ export function WalletConnect() {
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
             {account.address.slice(0, 6)}...{account.address.slice(-4)}
-            {isSlushWallet && <span className="ml-2 text-xs text-blue-500">(Slush)</span>}
+            {isSlushWallet && <span className="ml-2 text-xs text-blue-500">(Slush)</span>}            
+            {chainId && (
+              <span className="ml-2 text-xs text-yellow-500">
+                (Chain: {String(chainId)})
+              </span>
+            )}
           </span>
+          <NetworkSwitcher />
           <ConnectButton className="!bg-blue-600 hover:!bg-blue-700" />
         </div>
       ) : (
