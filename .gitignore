@@ -65,3 +65,4 @@ htmlcov/
 
 # Replit specific
 .replit
+.vercel
