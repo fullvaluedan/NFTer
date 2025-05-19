@@ -250,3 +250,69 @@ The backend must be deployed to a Python-compatible hosting service that can run
 - Set up proper error handling and logging
 - Consider using environment-specific configuration files
 - Make sure your backend service can handle the expected load
+
+## Sui Client Setup (for Devnet v1.48.0)
+
+These instructions will guide you through setting up the Sui client for interacting with the devnet.
+
+1.  **Create a `bin` directory in your project:**
+    If you don't already have it, create a directory to store the Sui client binary.
+
+    ```bash
+    mkdir -p ~/projects/NFTer/nfter-next/bin
+    ```
+
+2.  **Download the Sui Client:**
+    Download the specified version of the Sui client for Ubuntu x86_64.
+
+    ```bash
+    wget https://github.com/MystenLabs/sui/releases/download/devnet-v1.48.0/sui-devnet-v1.48.0-ubuntu-x86_64.tgz -P ~/Downloads
+    ```
+
+3.  **Extract the Archive:**
+    Navigate to your Downloads directory (or wherever you saved the file) and extract the archive.
+
+    ```bash
+    cd ~/Downloads
+    tar -xzf sui-devnet-v1.48.0-ubuntu-x86_64.tgz
+    ```
+
+4.  **Move the Sui Binary:**
+    Move the `sui` executable from the extracted folder to your project's `bin` directory.
+
+    ```bash
+    mv sui-devnet-v1.48.0-ubuntu-x86_64/sui ~/projects/NFTer/nfter-next/bin/
+    ```
+
+5.  **Update your PATH in `.bashrc`:**
+    Add your project's `bin` directory to your PATH environment variable so you can run the `sui` command from anywhere. Open your `.bashrc` file with a text editor (e.g., `nano`, `vim`, `gedit`):
+
+    ```bash
+    nano ~/.bashrc
+    ```
+
+    Add the following line at the end of the file:
+
+    ```bash
+    export PATH="~/projects/NFTer/nfter-next/bin:$PATH"
+    ```
+
+    Save the file and exit the editor.
+
+6.  **Apply Changes to `.bashrc`:**
+    Source your `.bashrc` file to apply the changes to your current terminal session.
+
+    ```bash
+    source ~/.bashrc
+    ```
+
+7.  **Verify Installation:**
+    Check if the Sui client is correctly installed and in your PATH.
+
+    ```bash
+    sui --version
+    ```
+
+    You should see an output like `sui devnet-v1.48.0-...`.
+
+After these steps, you'll have the Sui client ready to use for deploying and interacting with your Move contracts on the devnet.

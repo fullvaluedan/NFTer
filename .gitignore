@@ -66,3 +66,5 @@ htmlcov/
 # Replit specific
 .replit
 .vercel
+flatland
+bin

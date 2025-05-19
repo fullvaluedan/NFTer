@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/carousel'
 import { toast } from 'sonner'
 import { Download } from 'lucide-react'
+import { WalrusUpload } from '@/components/WalrusUpload'
 
 const ROLES = [
   {
@@ -276,6 +277,15 @@ export default function Home() {
                           >
                             <Download className="h-4 w-4" />
                           </Button>
+                        </div>
+                        <div className="mt-4">
+                          <WalrusUpload 
+                            imageUrl={imageUrl}
+                            onUploadComplete={(data) => {
+                              console.log('Uploaded to Walrus:', data);
+                              toast.success('Image uploaded to Walrus successfully!');
+                            }}
+                          />
                         </div>
                       </CarouselItem>
                     ))}
