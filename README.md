@@ -316,3 +316,317 @@ These instructions will guide you through setting up the Sui client for interact
     You should see an output like `sui devnet-v1.48.0-...`.
 
 After these steps, you'll have the Sui client ready to use for deploying and interacting with your Move contracts on the devnet.
+
+## Devnet Deployment & Initialization
+
+Once your Sui client is set up (see "Sui Client Setup" section) and your `nfter.move` contract compiles successfully (`sui move build --dev` in the `move` directory), follow these steps to deploy to devnet, initialize your collection, and make it available for public minting.
+
+**1. Pre-flight Checks:**
+
+- **Ensure Active Environment is Devnet:**
+
+  ```bash
+  sui client active-env
+  ```
+
+  If it's not devnet, switch:
+
+  ```bash
+  sui client switch --env devnet
+  ```
+
+- **Check Active Address & Gas:**
+  Ensure your active address (which will be the admin/owner of the collection initially) has SUI tokens on devnet.
+  ```bash
+  sui client active-address
+  sui client gas
+  ```
+  If you need SUI, use the devnet faucet. Replace `YOUR_SUI_ADDRESS` with the output from `sui client active-address`:
+  ```bash
+  curl --location --request POST 'https://faucet.devnet.sui.io/gas' --header 'Content-Type: application/json' --data-raw '{"FixedAmountRequest":{"recipient":"YOUR_SUI_ADDRESS"}}'
+  ```
+
+**2. Publish the Contract:**
+
+Navigate to your `move` directory in the terminal:
+
+```bash
+cd /path/to/your/project/NFTer/move
+# Or if you are already in the project root: cd move
+```
+
+Then, publish the contract:
+
+```bash
+sui client publish --gas-budget 500000000 --json
+```
+
+- **IMPORTANT:** From the JSON output of this command, carefully note down the `packageId`. You will need this for the next steps.
+  Look for a section similar to:
+  ```json
+  // ...
+  "effects": {
+    // ...
+    "created": [
+      // ... other created objects ...
+      {
+        "owner": {
+          "Immutable": true
+        },
+        "reference": {
+          "objectId": "0x_YOUR_PACKAGE_ID", // <-- This is it!
+          "version": "1",
+          "digest": "..."
+        }
+      }
+    ]
+    // ...
+  }
+  // ...
+  ```
+  The `objectId` of the immutable created object is your `packageId`.
+
+**3. Initialize the Collection:**
+
+Use the `packageId` you just obtained. The following command calls the `init_collection` function in your contract.
+
+- **Parameters to decide:**
+  - `MINT_FEE_MIST`: Minting fee in MIST (1 SUI = 1,000,000,000 MIST). E.g., `1000000` for 0.001 SUI.
+  - `PROMPT_UPDATE_FEE_MIST`: Fee to update the advisor prompt, in MIST. E.g., `500000` for 0.0005 SUI.
+
+Replace `<YOUR_PACKAGE_ID>`, `<MINT_FEE_MIST>`, and `<PROMPT_UPDATE_FEE_MIST>` with your actual values:
+
+```bash
+sui client call --package <YOUR_PACKAGE_ID> --module nfter --function init_collection \
+    --args "Offbrand Crypto" "The official collection of Offbrand Crypto NFTs, uniquely generated and ready for the 8-Bit Oracle." <MINT_FEE_MIST> <PROMPT_UPDATE_FEE_MIST> \
+    --gas-budget 100000000 --json
+```
+
+- **IMPORTANT:** From the JSON output of this command, find the `objectId` of the newly created `OffbrandCollection` object. Look for it in the `created` section of the `effects`.
+  This will be your `collectionId` (or `COLLECTION_OBJECT_ID`).
+
+**4. Share the Collection Object:**
+
+This step is **CRITICAL** to allow the public to mint NFTs into your collection. The admin (current owner of the collection object) must share it.
+
+Replace `<YOUR_COLLECTION_OBJECT_ID>` with the ID you obtained from the previous step:
+
+```bash
+sui client transfer --to-shared --object-id <YOUR_COLLECTION_OBJECT_ID> --gas-budget 100000000
+```
+
+After this, your `OffbrandCollection` is shared and publicly accessible for minting (via the `mint_nft` function) and for other interactions defined in your contract that use the shared collection object ID.
+
+**Next Steps (CLI Testing - Recommended):**
+
+Before integrating with the frontend, it's highly recommended to test minting and other functions via the CLI to ensure everything works as expected.
+
+- **To Mint an NFT (Example):**
+  You'll need your shared `<YOUR_COLLECTION_OBJECT_ID>`, and details for the NFT.
+
+  ```bash
+  # Example parameters (replace with actuals)
+  NFT_NAME="My First Offbrand"
+  NFT_DESCRIPTION="A unique piece of digital art"
+  ROYALTY_RECIPIENT_ADDRESS="0x_YOUR_SUI_ADDRESS_FOR_ROYALTIES_OR_MINTER_ADDRESS"
+  ROYALTY_PERCENTAGE=100 # For 100%
+  ORACLE_BASE_PROMPT="Advise on the nature of creativity"
+  ORACLE_STYLE_PROMPT="In a cryptic tone"
+  WALRUS_BLOB_ID="your_walrus_blob_id_here"
+  IMAGE_URL="https://walrus.xyz/blob/your_walrus_blob_id_here"
+  IMAGE_GEN_PROMPT="A pixel art wizard contemplating an orb"
+  MODEL_VERSION="sdxl-v1.0"
+  GENERATION_PARAMS='{}' # JSON string of other params
+  ATTRIBUTE_NAMES='["rarity","power_level"]' # JSON-style string array for CLI
+  ATTRIBUTE_VALUES='["epic","9001"]'     # JSON-style string array for CLI
+  COIN_FOR_PAYMENT="0x_ID_OF_A_COIN_YOU_OWN_WITH_SUFFICIENT_BALANCE"
+
+  sui client call --package <YOUR_PACKAGE_ID> --module nfter --function mint_nft \
+      --args <YOUR_COLLECTION_OBJECT_ID> "${NFT_NAME}" "${NFT_DESCRIPTION}" \
+      "[${ROYALTY_RECIPIENT_ADDRESS}]" "[${ROYALTY_PERCENTAGE}]" \
+      "${ORACLE_BASE_PROMPT}" "${ORACLE_STYLE_PROMPT}" \
+      "${WALRUS_BLOB_ID}" "${IMAGE_URL}" \
+      "${IMAGE_GEN_PROMPT}" "${MODEL_VERSION}" "${GENERATION_PARAMS}" \
+      "${ATTRIBUTE_NAMES}" "${ATTRIBUTE_VALUES}" \
+      ${COIN_FOR_PAYMENT} \
+      --gas-budget 200000000 --json
+  ```
+
+  Note the `objectId` of the newly created `OffbrandNFT` from the output.
+
+Remember to replace placeholders like `<YOUR_PACKAGE_ID>` with the actual values you obtain during the process.
+
+## Contract Features
+
+- Single "Offbrand Crypto" collection
+- AI-generated NFT minting with image metadata
+- Updatable "8-Bit Oracle" advisor prompts
+- On-chain royalties using Sui's TransferPolicy system
+- Kiosk-compatible for marketplace integration
+- Dynamic attributes for NFTs
+
+## Prerequisites
+
+- [Sui CLI](https://docs.sui.io/build/install)
+- [Node.js](https://nodejs.org/) (for frontend)
+- [pnpm](https://pnpm.io/) (for frontend)
+
+## Contract Deployment
+
+### 1. Build the Contract
+
+```bash
+cd move
+sui move build
+```
+
+### 2. Deploy to Devnet
+
+```bash
+sui client publish --gas-budget 500000000
+```
+
+Note the `packageId` from the output. You'll need this for all subsequent commands.
+
+### 3. Initialize Collection
+
+```bash
+sui client call \
+  --package <PACKAGE_ID> \
+  --module nfter \
+  --function init_collection \
+  --args \
+    "Offbrand Crypto" \
+    "The official collection of offbrand crypto NFTs" \
+    1000000 \  # 0.001 SUI minting fee
+    500000 \   # 0.0005 SUI prompt update fee
+  --gas-budget 10000000
+```
+
+Note the `OffbrandCollection` object ID from the output. This is your `collectionId`.
+
+### 4. Set Collection Royalties
+
+The collection uses a shared TransferPolicy for all NFTs. To set the royalty rules:
+
+```bash
+sui client call \
+  --package <PACKAGE_ID> \
+  --module nfter \
+  --function update_royalty_rules \
+  --args \
+    <COLLECTION_ID> \
+    <TRANSFER_POLICY_ID> \
+    <TRANSFER_POLICY_CAP_ID> \
+    500 \     # 5% royalty (500 basis points)
+    1000000 \ # 0.001 SUI minimum royalty
+  --gas-budget 10000000
+```
+
+You can find the `TRANSFER_POLICY_ID` in the collection object's `transfer_policy_id` field. The `TRANSFER_POLICY_CAP_ID` is the ID of the TransferPolicyCap that was transferred to you during collection initialization.
+
+## Frontend Development
+
+### 1. Install Dependencies
+
+```bash
+cd frontend
+pnpm install
+```
+
+### 2. Configure Environment
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_SUI_NETWORK=testnet
+NEXT_PUBLIC_PACKAGE_ID=<PACKAGE_ID>
+NEXT_PUBLIC_COLLECTION_ID=<COLLECTION_ID>
+```
+
+### 3. Run Development Server
+
+```bash
+pnpm dev
+```
+
+## Minting NFTs
+
+### 1. Prepare Image
+
+Upload your image to Walrus and note the `walrus_blob_id` and `image_url`.
+
+### 2. Mint NFT
+
+```bash
+sui client call \
+  --package <PACKAGE_ID> \
+  --module nfter \
+  --function mint_nft \
+  --args \
+    <COLLECTION_ID> \
+    "NFT Name" \
+    "NFT Description" \
+    ["0xRECIPIENT_ADDRESS"] \  # Royalty recipient
+    [100] \                    # 100% royalty percentage
+    "Base Prompt" \
+    "Style Prompt" \
+    <WALRUS_BLOB_ID> \
+    <IMAGE_URL> \
+    "Generation Prompt" \
+    "Model Version" \
+    "Generation Params" \
+    [] \                       # Attribute names
+    [] \                       # Attribute values
+    <PAYMENT_COIN_ID> \
+  --gas-budget 10000000
+```
+
+## Updating NFT Prompts
+
+```bash
+sui client call \
+  --package <PACKAGE_ID> \
+  --module nfter \
+  --function update_prompt \
+  --args \
+    <COLLECTION_ID> \
+    <NFT_ID> \
+    "New Base Prompt" \
+    "New Style Prompt" \
+    <PAYMENT_COIN_ID> \
+  --gas-budget 10000000
+```
+
+## Marketplace Integration
+
+Our NFTs are kiosk-compatible and can be listed on any Sui marketplace that uses the Kiosk system. See [Kiosk Integration ADR](docs/adr/0002-kiosk-integration.md) for details.
+
+## Testing
+
+### 1. Unit Tests
+
+```bash
+cd move
+sui move test
+```
+
+### 2. Kiosk Compatibility Test
+
+```bash
+# Create a kiosk
+sui client call --package 0x2 --module kiosk --function create --gas-budget 10000000
+
+# List an NFT
+sui client call --package 0x2 --module kiosk --function list \
+  --args <KIOSK_ID> <NFT_ID> <PRICE> --gas-budget 10000000
+```
+
+## Architecture
+
+- [NFT Contract Design ADR](docs/adr/nft-contract-design.md)
+- [Kiosk Integration ADR](docs/adr/0002-kiosk-integration.md)
+
+## License
+
+MIT

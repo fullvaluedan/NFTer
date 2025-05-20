@@ -68,3 +68,7 @@ htmlcov/
 .vercel
 flatland
 bin
+
+# Private individual user cursor rules
+.cursor
+xnotes
