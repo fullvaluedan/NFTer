@@ -92,14 +92,16 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
       const attributeNames = ["Role", "Model Version"];
       const attributeValues = [role, formData.modelVersion];
 
+      // Construct the image URL from the blob ID
+      const imageUrl = `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${walrusData.blobId}`;
+
       // --- LOGGING BEFORE txb.pure.string ---
       console.log("handleMint: Values for txb.pure.string:", {
-        name: formData.name,
         description: formData.description,
+        imageUrl,
+        walrusBlobId: walrusData.blobId,
         basePrompt: formData.basePrompt,
         stylePrompt: formData.stylePrompt,
-        walrusBlobId: walrusData.blobId,
-        walrusUrl: walrusData.url,
         generationPrompt: formData.generationPrompt,
         modelVersion: formData.modelVersion,
         generationParams: formData.generationParams,
@@ -137,12 +139,12 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
         arguments: [
           txb.object(collectionId),
           txb.pure.string(formData.description),
+          txb.pure.string(imageUrl),
           txb.makeMoveVec({ type: "address", elements: mappedRoyaltyRecipients }),
           txb.makeMoveVec({ type: "u8", elements: mappedRoyaltyPercentages }),
           txb.pure.string(formData.basePrompt),
           txb.pure.string(formData.stylePrompt),
           txb.pure.string(walrusData.blobId),
-          txb.pure.string(walrusData.url),
           txb.pure.string(formData.generationPrompt),
           txb.pure.string(formData.modelVersion),
           txb.pure.string(formData.generationParams),
@@ -161,12 +163,12 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
         --args \\
           ${collectionId} \\
           "${formData.description}" \\
+          "${imageUrl}" \\
           '${JSON.stringify(royaltyRecipients)}' \\
           '${JSON.stringify(royaltyPercentages)}' \\
           "${formData.basePrompt}" \\
           "${formData.stylePrompt}" \\
           "${walrusData.blobId}" \\
-          "${walrusData.url}" \\
           "${formData.generationPrompt.replace(/\n/g, '\\n')}" \\
           "${formData.modelVersion}" \\
           "${formData.generationParams}" \\

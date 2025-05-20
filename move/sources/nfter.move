@@ -6,7 +6,7 @@ module nfter::nfter {
     use sui::dynamic_field as df;
     use sui::coin::{Self, Coin};
     use sui::display;
-    use sui::transfer_policy::{Self, TransferPolicy, TransferPolicyCap};    
+    use sui::transfer_policy::{Self, TransferPolicy, TransferPolicyCap};
 
     use nfter::royalty_rule;
 
@@ -22,7 +22,7 @@ module nfter::nfter {
 
     /// The Offbrand Crypto collection
     public struct OffbrandCollection has key {
-        id: object::UID,
+        id: UID,
         name: String,
         description: String,
         admin: address,
@@ -36,9 +36,10 @@ module nfter::nfter {
     /// An Offbrand Crypto NFT
     /// royalty_info available from public field of stored object
     public struct OffbrandNFT has key, store {
-        id: object::UID,
+        id: UID,
         name: String,
         description: String,
+        image_url: String, // For marketplace compatibility, direct URL from parameters
         creator: address,
         mint_number: u64,
         royalty_info: vector<RoyaltyRecipient>,
@@ -60,8 +61,8 @@ module nfter::nfter {
 
     /// Image and generation metadata
     public struct ImageMetadata has store {
-        walrus_blob_id: String,
-        image_url: String,
+        walrus_blob_id: String, // The ID of the blob on Walrus
+        dynamic_image_url: String, // The direct URL, same as OffbrandNFT.image_url, stored for reference
         generation_prompt: String,
         model_version: String,
         generation_params: String,
@@ -70,14 +71,19 @@ module nfter::nfter {
 
     public struct NFTER has drop {}
 
-    fun init(otw: NFTER, ctx: &mut tx_context::TxContext) {
+    fun init(otw: NFTER, ctx: &mut TxContext) {
         let publisher = package::claim(otw, ctx);
         let mut display = display::new<OffbrandNFT>(&publisher, ctx);
 
         display.add(string::utf8(b"name"), string::utf8(b"OFFBRAND Crypto #{mint_number}"));
         display.add(string::utf8(b"description"), string::utf8(b"{description}"));
         display.add(string::utf8(b"mint_number"), string::utf8(b"{mint_number}"));
-        display.add(string::utf8(b"image_url"), string::utf8(b"https://walrus.xyz/blob/{df(image_metadata)::walrus_blob_id}"));
+        // This is the primary image_url field from the struct, expected by marketplaces.
+        display.add(string::utf8(b"image_url"), string::utf8(b"{image_url}")); 
+        // This one is constructed from the blob_id in the dynamic field.
+        display.add(string::utf8(b"dynamic_image_url_from_blob"), string::utf8(b"https://aggregator.walrus-testnet.walrus.space/v1/blobs/{df(image_metadata)::walrus_blob_id}"));
+        // This displays the direct dynamic_image_url stored in the dynamic field (which should match the main image_url).
+        display.add(string::utf8(b"dynamic_image_url_direct"), string::utf8(b"{df(image_metadata)::dynamic_image_url}"));
         display.add(string::utf8(b"generation_prompt"), string::utf8(b"{df(image_metadata)::generation_prompt}"));
         display.add(string::utf8(b"model_version"), string::utf8(b"{df(image_metadata)::model_version}"));
         display.add(string::utf8(b"created_at"), string::utf8(b"{df(image_metadata)::created_at}"));
@@ -96,7 +102,7 @@ module nfter::nfter {
         minting_fee: u64,
         prompt_update_fee: u64,
         publisher: package::Publisher,
-        ctx: &mut tx_context::TxContext
+        ctx: &mut TxContext
     ) {
         // Create the TransferPolicy for the collection
         let (policy, policy_cap) = transfer_policy::new<OffbrandNFT>(&publisher, ctx);
@@ -131,7 +137,7 @@ module nfter::nfter {
         policy_cap: &TransferPolicyCap<OffbrandNFT>,
         amount_bp: u16,
         min_amount: u64,
-        ctx: &mut tx_context::TxContext
+        ctx: &mut TxContext
     ) {
         // Verify the caller is the collection admin
         assert!(ctx.sender() == collection.admin, 0);
@@ -178,19 +184,19 @@ module nfter::nfter {
     public entry fun mint_nft(
         collection: &mut OffbrandCollection,
         description: String,
+        image_url: String, // Should be constructed as "https://aggregator.walrus-testnet.walrus.space/v1/blobs/{blob_id}"
         royalty_recipients: vector<address>,
         royalty_percentages: vector<u8>,
         base_prompt: String,
         style_prompt: String,
-        walrus_blob_id: String,
-        image_url: String,
+        walrus_blob_id: String, // The blob ID from Walrus
         generation_prompt_param: String,
         model_version: String,
         generation_params: String,
         attributes_names: vector<String>,
         attributes_values: vector<String>,
         mut payment: Coin<SUI>,
-        ctx: &mut tx_context::TxContext
+        ctx: &mut TxContext
     ) {
         let fee = collection.minting_fee;
         assert!(coin::value(&payment) >= fee, 1);
@@ -217,14 +223,16 @@ module nfter::nfter {
             id: nft_id,
             name: hardcoded_nft_name,
             description,
+            image_url,
             creator: ctx.sender(),
             mint_number: collection.total_minted + 1,
             royalty_info: royalty_info_data,
         };
 
+        // Store the same image URL in the metadata for consistency
         df::add(&mut nft.id, IMAGE_METADATA_KEY, ImageMetadata {
-            walrus_blob_id,
-            image_url,
+            walrus_blob_id, 
+            dynamic_image_url: image_url,
             generation_prompt: generation_prompt_param,
             model_version,
             generation_params,
@@ -259,7 +267,7 @@ module nfter::nfter {
         let metadata: &ImageMetadata = df::borrow(&nft.id, IMAGE_METADATA_KEY);
         (
             metadata.walrus_blob_id,
-            metadata.image_url,
+            metadata.dynamic_image_url, // Return dynamic_image_url from metadata
             metadata.generation_prompt,
             metadata.model_version,
             metadata.generation_params,
@@ -276,7 +284,7 @@ module nfter::nfter {
         new_base_prompt: String,
         new_style_prompt: String,
         mut payment: Coin<SUI>,
-        ctx: &mut tx_context::TxContext
+        ctx: &mut TxContext
     ) {
         let fee = collection.prompt_update_fee;
         assert!(coin::value(&payment) >= fee, 1);
@@ -305,7 +313,7 @@ module nfter::nfter {
         nft: &mut OffbrandNFT,
         attribute_name: String,
         new_value: String,
-        ctx: &mut tx_context::TxContext
+        ctx: &mut TxContext
     ) {
         assert!(ctx.sender() == nft.creator, 0);
         let attr: &mut NFTAttribute = df::borrow_mut(&mut nft.id, attribute_name);

@@ -646,8 +646,8 @@ Summary of deployed assets:
 ```
 --- All done! ---
 Summary of deployed assets:
-  Package ID:         0xf77e45b4bee26a577a89a4a8951228ff6ec5f6852d8cf26f44260c4eb60cf709
-  Collection ID:      0x8ac5083d94df8bbfa26e25ed6b0f94d6f016a52185e77491ba687f54b49917e5
-  TransferPolicy ID:  0x36de26a47f6fc880fbda40dae5163ccee7c9969b6991b5502422c9f4c7172cdd
-  TransferPolicyCap ID: 0x22e2026c8eea6f4b97a3b2e4ae0a1a39096257d02372492b512f544d554d0412
+  Package ID:         0xf623d44db431f73308e982048eefb8ac6e53ccbd9fa772451fa91c372107cfef
+  Collection ID:      0xcc12d8f4e0c55efff2ca7b230e75230c6be3bc1a32fcecda1b07e9ed94942254
+  TransferPolicy ID:  0x0a83e27ba7bd2312b70182140ddfed1a407c091009954a343aa00a7cb971895e
+  TransferPolicyCap ID: 0xa333dac2fe764fea113e3f8b34d6caffdd8ca17e42de58aa48e9b8a5415126ee
 ```
