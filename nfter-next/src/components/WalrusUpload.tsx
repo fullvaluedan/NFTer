@@ -90,15 +90,15 @@ export function WalrusUpload({
   }, [uploadedImage, collectionId, packageId, role, prompt]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-3 sm:gap-4">
       {!uploadedImage ? (
         <>
           {!account ? (
-            <div className="w-full space-y-4 text-center">
+            <div className="w-full space-y-3 sm:space-y-4 text-center">
               <p className="text-sm text-muted-foreground">
                 Connect your wallet to upload to Walrus
               </p>
-              <ConnectButton className="w-full !bg-blue-600 hover:!bg-blue-700">
+              <ConnectButton className="w-full !bg-blue-600 hover:!bg-blue-700 text-sm sm:text-base py-2 sm:py-3">
                 <Wallet className="mr-2 h-4 w-4" />
                 Connect Wallet
               </ConnectButton>
@@ -107,7 +107,7 @@ export function WalrusUpload({
             <Button
               onClick={handleUpload}
               disabled={isLoading}
-              className="w-full"
+              className="w-full text-sm sm:text-base py-2 sm:py-3"
             >
               {isLoading ? 'Uploading...' : (
                 <>
@@ -119,23 +119,24 @@ export function WalrusUpload({
           )}
         </>
       ) : (
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-3 sm:space-y-4">
           <div className="relative aspect-square w-full overflow-hidden rounded-lg border">
             <Image
               src={uploadedImage.url}
               alt="Uploaded to Walrus"
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
           <div className="flex flex-col gap-2">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground break-all">
               <p>Blob ID: {uploadedImage.blobId}</p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-full text-sm sm:text-base py-2 sm:py-3"
               onClick={() => window.open(uploadedImage.url, '_blank')}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
@@ -143,7 +144,6 @@ export function WalrusUpload({
             </Button>
           </div>
 
-          {/* Removed the direct console.log from here */}
           <MintNFT
             walrusData={uploadedImage}
             collectionId={collectionId}
@@ -153,7 +153,7 @@ export function WalrusUpload({
           />
         </div>
       )}
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-xs sm:text-sm text-red-500">{error}</p>}
     </div>
   );
 }

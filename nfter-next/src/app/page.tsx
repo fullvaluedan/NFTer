@@ -193,20 +193,20 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-blue-600">NFTer</h1>
-          <p className="text-xl text-gray-600">
+    <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-blue-600">NFTer</h1>
+          <p className="text-lg sm:text-xl text-gray-600">
             Transform your photos into unique anime-style characters using AI
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium">Choose a role</label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a role (or leave random)" />
               </SelectTrigger>
               <SelectContent>
@@ -260,55 +260,35 @@ export default function Home() {
         </form>
 
         {isLoading && (
-          <div className="mt-6 text-center">
-            <p>Transforming your image...</p>
-            <div className="mx-auto my-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-            <p className="text-sm text-muted-foreground">
-              This might take up to a minute depending on the image size.
-            </p>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-sm text-muted-foreground">Generating your anime character...</p>
           </div>
         )}
 
         {generatedImages.length > 0 && (
-          <div className="mt-6 space-y-4">
-            <h5 className="text-center text-lg font-semibold">Your Transformed Images</h5>
-            <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
-              {/* Original image preview */}
-              {originalImageUrl && (
-                <div className="flex flex-col items-center w-full md:w-1/3">
-                  <div className="relative aspect-square w-full overflow-hidden rounded-lg border">
-                    <Image
-                      src={originalImageUrl}
-                      alt="Original uploaded"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <p className="mt-2 text-center text-sm text-muted-foreground">Original Image</p>
-                </div>
-              )}
-              {/* Transformed images carousel */}
-              <div className="w-full md:w-2/3">
-                <Carousel className="w-full" opts={{ loop: true }}>
-                  <CarouselContent>
-                    {generatedImages.map((imageUrl, index) => (
-                      <CarouselItem key={index}>
-                        <div className="p-1">
-                          <div className="relative aspect-square overflow-hidden rounded-lg border">
+          <div className="space-y-4">
+            <div className="relative">
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {generatedImages.map((imageUrl, index) => (
+                    <CarouselItem key={index}>
+                      <div className="p-1">
+                        <div className="space-y-4">
+                          <div className="relative aspect-square w-full overflow-hidden rounded-lg border">
                             <Image
                               src={imageUrl}
                               alt={`Generated avatar ${index + 1}`}
                               fill
                               className="object-cover"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             />
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-center text-white">
-                              <p>Power Score: <span className={getScoreColor(imageScores[index])}>{imageScores[index]}</span></p>
-                            </div>
                           </div>
-                          <div className="mt-2 flex justify-center gap-2">
+                          <div className="mt-2 flex flex-col sm:flex-row justify-center gap-2">
                             <Button
                               variant="outline"
                               size="sm"
+                              className="w-full sm:w-auto"
                               onClick={() => window.open(imageUrl, '_blank')}
                             >
                               <ExternalLink className="mr-2 h-4 w-4" />
@@ -317,6 +297,7 @@ export default function Home() {
                             <Button
                               variant="outline"
                               size="sm"
+                              className="w-full sm:w-auto"
                               onClick={() => {
                                 const link = document.createElement('a')
                                 link.href = imageUrl
@@ -340,20 +321,20 @@ export default function Home() {
                             />
                           </div>
                         </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
-              </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="hidden sm:flex" />
+                <CarouselNext className="hidden sm:flex" />
+              </Carousel>
             </div>
           </div>
         )}
 
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h5 className="mb-3 text-lg font-semibold">About this tool</h5>
-          <p className="mb-4 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
+          <h5 className="mb-2 sm:mb-3 text-base sm:text-lg font-semibold">About this tool</h5>
+          <p className="mb-3 sm:mb-4 text-sm text-muted-foreground">
             This tool uses advanced AI technology to transform your photos and add you to any community. The transformation is powered by cutting-edge image generation models.
           </p>
           <p className="text-sm text-muted-foreground">

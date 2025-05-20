@@ -207,63 +207,66 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
   };
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-3 sm:space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">NFT Name</Label>
+        <Label htmlFor="name" className="text-sm sm:text-base">NFT Name</Label>
         <Input
           id="name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           placeholder="Enter NFT name"
+          className="text-sm sm:text-base"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" className="text-sm sm:text-base">Description</Label>
         <Textarea
           id="description"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           placeholder="Enter NFT description"
+          className="text-sm sm:text-base min-h-[80px] sm:min-h-[100px]"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="basePrompt">Base Prompt</Label>
+        <Label htmlFor="basePrompt" className="text-sm sm:text-base">Base Prompt</Label>
         <Textarea
           id="basePrompt"
           value={formData.basePrompt}
           onChange={(e) => setFormData({ ...formData, basePrompt: e.target.value })}
           placeholder="Enter base prompt for 8-bit Oracle"
+          className="text-sm sm:text-base min-h-[60px] sm:min-h-[80px]"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="stylePrompt">Style Prompt</Label>
+        <Label htmlFor="stylePrompt" className="text-sm sm:text-base">Style Prompt</Label>
         <Textarea
           id="stylePrompt"
           value={formData.stylePrompt}
           onChange={(e) => setFormData({ ...formData, stylePrompt: e.target.value })}
           placeholder="Enter style prompt for 8-bit Oracle"
+          className="text-sm sm:text-base min-h-[60px] sm:min-h-[80px]"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="generationPrompt">Generation Prompt</Label>
+        <Label htmlFor="generationPrompt" className="text-sm sm:text-base">Generation Prompt</Label>
         <Textarea
           id="generationPrompt"
           value={formData.generationPrompt}
           onChange={(e) => setFormData({ ...formData, generationPrompt: e.target.value })}
           placeholder="Enter the prompt used to generate this image"
-          // You might want to make this readOnly if it's strictly AI-generated and not editable by the user
-          // readOnly
+          className="text-sm sm:text-base min-h-[60px] sm:min-h-[80px]"
         />
       </div>
 
       <Button
         onClick={handleMint}
         disabled={isPending || !account}
-        className="w-full"
+        className="w-full text-sm sm:text-base py-2 sm:py-3"
       >
         {isPending ? (
           <>
