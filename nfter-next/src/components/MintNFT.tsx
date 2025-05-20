@@ -104,6 +104,7 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
           onError: (error: Error) => {
             toast.error('Failed to mint NFT');
             console.error('Mint error:', error);
+            alert(JSON.stringify(error)); // Add this for debugging
           },
         }
       );

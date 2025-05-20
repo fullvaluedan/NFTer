@@ -11,8 +11,8 @@ set -e # Exit immediately if a command exits with a non-zero status.
 PUBLISH_DIR="../../move" # Directory containing your Move package
 COLLECTION_NAME="Offbrand Crypto"
 COLLECTION_DESC="The official collection of Offbrand Crypto NFTs, uniquely generated and ready for the 8-Bit Oracle."
-MINT_FEE="100000000"  # Example: 0.1 SUI (1 SUI = 1,000,000,000 MIST)
-PROMPT_FEE="10000000" # Example: 0.01 SUI
+MINT_FEE="1000000"    # Example: 0.001 SUI (1 SUI = 1,000,000,000 MIST)
+PROMPT_FEE="1000000"  # Example: 0.001 SUI
 ROYALTY_BP="500"      # 500 basis points = 5% (500/10000)
 ROYALTY_MIN="1000000" # Minimum royalty in MIST (e.g., 0.001 SUI)
 
