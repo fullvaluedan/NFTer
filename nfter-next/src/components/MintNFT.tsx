@@ -86,8 +86,8 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
           txb.pure.string(formData.generationPrompt),
           txb.pure.string(formData.modelVersion),
           txb.pure.string(formData.generationParams),
-          txb.makeMoveVec({ type: "string", elements: attributeNames.map(name => txb.pure.string(name)) }),
-          txb.makeMoveVec({ type: "string", elements: attributeValues.map(value => txb.pure.string(value)) }),
+          txb.makeMoveVec({ type: "0x1::string::String", elements: attributeNames.map(name => txb.pure.string(name)) }),
+          txb.makeMoveVec({ type: "0x1::string::String", elements: attributeValues.map(value => txb.pure.string(value)) }),
           paymentCoin,
         ],
       });
