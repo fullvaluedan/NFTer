@@ -54,8 +54,8 @@ function FaucetRequest() {
     }
   };
 
-  // Only show faucet for testnet and devnet
-  if (!['testnet', 'devnet'].includes(currentNetwork)) {
+  // Only show faucet for testnet
+  if (!['testnet'].includes(currentNetwork)) {
     return null;
   }
 
@@ -85,6 +85,8 @@ export function WalletDetails() {
   const { data: balance } = useSuiClientQuery('getBalance', {
     owner: account?.address || '',
   });
+
+  const networkName = currentNetwork || 'Unknown Network';
 
   if (!account) {
     return (
@@ -123,7 +125,7 @@ export function WalletDetails() {
             </div>
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Current Network</h3>
-              <p className="text-sm">{currentNetwork}</p>
+              <p className="text-sm">{networkName}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Chain ID</h3>

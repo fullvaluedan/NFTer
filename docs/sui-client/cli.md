@@ -25,7 +25,7 @@ pay-sui Pay SUI coins to recipients following following specified amounts, with 
 gas payment, so no extra gas coin is required
 publish Publish Move modules
 split-coin Split a coin object into multiple coins
-switch Switch active address and network(e.g., devnet, local rpc server)
+switch Switch active address and network(e.g., testnet, local rpc server)
 tx-block Get the effects of executing the given transaction block
 transfer Transfer object
 transfer-sui Transfer SUI, and pay gas with the same SUI coin object. If amount is specified, only the amount is transferred; otherwise the entire object is transferred
