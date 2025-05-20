@@ -7,8 +7,7 @@ import { useState } from 'react';
 
 // Create network configuration
 const { networkConfig } = createNetworkConfig({
-  testnet: { url: getFullnodeUrl('testnet') },
-  devnet: { url: getFullnodeUrl('devnet') },
+  testnet: { url: getFullnodeUrl('testnet') },  
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {

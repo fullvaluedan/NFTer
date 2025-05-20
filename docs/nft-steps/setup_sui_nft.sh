@@ -5,8 +5,6 @@
 # This script automates the publication of a Move package,
 # initialization of an NFT collection, and setting of royalty rules.
 
-set -e # Exit immediately if a command exits with a non-zero status.
-
 # --- Hardcoded Parameters ---
 PUBLISH_DIR="../../move" # Directory containing your Move package
 COLLECTION_NAME="Offbrand Crypto"

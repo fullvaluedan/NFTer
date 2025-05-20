@@ -631,10 +631,23 @@ sui client call --package 0x2 --module kiosk --function list \
 
 MIT
 
+**DEVNET**
+
 ```
 Summary of deployed assets:
   Package ID:         0x4448d95a34e3d103f628fad9265358ea4802c661d9b107191912b30dddfff2ee
   Collection ID:      0x48df38789f69e5e31cb6095fc282f54c51fc411fb5469e4b1f87161e2e224fba
   TransferPolicy ID:  0x96b22d351b70fee01e1d35e45b1b2f7f8f983f038266f9df343b1ae94a6ff906
   TransferPolicyCap ID: 0x8cc9663c39ab966a896ce09b9b87c2c79d205923528ea9aabbed7516116f3fb7
+```
+
+**TESTNET**
+
+```
+--- All done! ---
+Summary of deployed assets:
+  Package ID:         0x2dbfd7c0968648c3480d51aead63256281883358f6f19e04fa037af505ebd977
+  Collection ID:      0x86017d2f0888d10c0567e310624edd90402c8f105bcd830a5af24a7680584e58
+  TransferPolicy ID:  0x98b0d473b8b0ee6e833ca2daa7dc6ba95b2333a5dfece743474de374524657da
+  TransferPolicyCap ID: 0x3f70d90ad33f05f08f9fd326d94a65614e3730886ce1b8c0221982e0537bba83
 ```

@@ -6,7 +6,7 @@
 set -e # Exit immediately if a command exits with a non-zero status
 
 # --- Configuration ---
-TRANSFER_POLICY_ID="0x06d9c5d56046de6f27ecdfd0b782fa23de3af2e26d54909e691ccc8eaa1cceab" # Replace with your TransferPolicy ID
+TRANSFER_POLICY_ID="0x98b0d473b8b0ee6e833ca2daa7dc6ba95b2333a5dfece743474de374524657da" # Replace with your TransferPolicy ID
 
 echo "--- Extracting Royalty Data for TransferPolicy: $TRANSFER_POLICY_ID ---"
 echo "---------------------------------------------------------------------"

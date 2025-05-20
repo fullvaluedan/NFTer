@@ -14,6 +14,11 @@
 **GET GAS**
 
 ```
+curl --location --request POST 'https://faucet.testnet.sui.io/v2/gas' --header 'Content-Type: application/json' --data-raw '{"FixedAmountRequest":{
+"recipient":"0xb77e64fd104aa3567129d7ead47c10286847c936e1932f36319337ae2c241f4b"}}'
+```
+
+```
 (.env) hosermage@LAPTOP-1RPE37PF:~/projects/NFTer/move$ curl --location --request POST 'https://faucet.devnet.sui.io/v2/gas' --header 'Content-Type: application/json' --data-raw '{"FixedAmountRequest":{
 "recipient":"0xb77e64fd104aa3567129d7ead47c10286847c936e1932f36319337ae2c241f4b"}}'
 {"status":"Success","coins_sent":[{"amount":10000000000,"id":"0x2e11ac57aca575d0eabc82aa2e6220ffa1ff7a3cbb806b0c638252eedebaa8a8","transferTxDigest":"FaAsoEBPqCwmJLYc4pjpcFRudPLzaNZWGcKqqvWy9uLa"}]}(.env) hosermage@LAPTOP-1RPE37PF:~/projects/NFTer/move$ sui client gas

@@ -42,7 +42,7 @@ function FaucetRequest() {
     try {
       setIsRequesting(true);
       await requestSuiFromFaucetV2({
-        host: getFaucetHost(currentNetwork as 'testnet' | 'devnet' | 'localnet'),
+        host: getFaucetHost(currentNetwork as 'testnet'),
         recipient: account.address,
       });
       toast.success('Successfully requested SUI from faucet');
