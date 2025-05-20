@@ -1,5 +1,6 @@
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
+import { SuiClient } from '@mysten/sui/client';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -23,6 +24,10 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
   const account = useCurrentAccount();
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
   
+  // --- PROPS LOGGING ---
+  console.log("MintNFT Props:", { walrusData, collectionId, packageId, role, prompt });
+  // ---------------------
+
   const [formData, setFormData] = useState({
     name: `The ${role} Avatar`,
     description: `An AI-generated anime avatar in the ${role} style.`,
@@ -60,10 +65,26 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
       return;
     }
 
+    // --- PRE-TRANSACTION LOGGING ---
+    console.log("handleMint: Starting mint process");
+    console.log("handleMint: Account:", account);
+    console.log("handleMint: formData before txb construction:", formData);
+    console.log("handleMint: walrusData:", walrusData);
+    console.log("handleMint: collectionId:", collectionId);
+    console.log("handleMint: packageId:", packageId);
+    console.log("handleMint: role:", role);
+    // -----------------------------
+
     try {
       const txb = new Transaction();
-      
-      const [paymentCoin] = txb.splitCoins(txb.gas, [txb.pure.u64(1_000_000)]); 
+
+      // --- PAYMENT COIN LOGGING ---
+      console.log("handleMint: Preparing payment coin. Gas object:", txb.gas);
+      const paymentAmount = 1_000_000;
+      console.log("handleMint: Payment amount (u64):", paymentAmount);
+      // --------------------------
+      const [paymentCoin] = txb.splitCoins(txb.gas, [txb.pure.u64(paymentAmount)]);
+      console.log("handleMint: paymentCoin object after split:", paymentCoin);
 
       const royaltyRecipients = [account.address];
       const royaltyPercentages = [100];
@@ -71,14 +92,54 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
       const attributeNames = ["Role", "Model Version"];
       const attributeValues = [role, formData.modelVersion];
 
+      // --- LOGGING BEFORE txb.pure.string ---
+      console.log("handleMint: Values for txb.pure.string:", {
+        name: formData.name,
+        description: formData.description,
+        basePrompt: formData.basePrompt,
+        stylePrompt: formData.stylePrompt,
+        walrusBlobId: walrusData.blobId,
+        walrusUrl: walrusData.url,
+        generationPrompt: formData.generationPrompt,
+        modelVersion: formData.modelVersion,
+        generationParams: formData.generationParams,
+      });
+      // --- END LOGGING BEFORE txb.pure.string ---
+
+      // --- LOGGING BEFORE txb.makeMoveVec ---
+      const mappedRoyaltyRecipients = royaltyRecipients.map(addr => {
+        console.log("handleMint: txb.pure.address for royaltyRecipient:", addr);
+        return txb.pure.address(addr);
+      });
+      console.log("handleMint: Elements for royaltyRecipients vector:", mappedRoyaltyRecipients);
+
+      const mappedRoyaltyPercentages = royaltyPercentages.map(pct => {
+        console.log("handleMint: txb.pure.u8 for royaltyPercentage:", pct);
+        return txb.pure.u8(pct);
+      });
+      console.log("handleMint: Elements for royaltyPercentages vector:", mappedRoyaltyPercentages);
+
+      const mappedAttributeNames = attributeNames.map(name => {
+        console.log("handleMint: txb.pure.string for attributeName:", name);
+        return txb.pure.string(name);
+      });
+      console.log("handleMint: Elements for attributeNames vector:", mappedAttributeNames);
+
+      const mappedAttributeValues = attributeValues.map(value => {
+        console.log("handleMint: txb.pure.string for attributeValue:", value);
+        return txb.pure.string(value);
+      });
+      console.log("handleMint: Elements for attributeValues vector:", mappedAttributeValues);
+      // --- END LOGGING BEFORE txb.makeMoveVec ---
+
       txb.moveCall({
         target: `${packageId}::nfter::mint_nft`,
         arguments: [
           txb.object(collectionId),
           txb.pure.string(formData.name),
           txb.pure.string(formData.description),
-          txb.makeMoveVec({ type: "address", elements: royaltyRecipients.map(addr => txb.pure.address(addr)) }),
-          txb.makeMoveVec({ type: "u8", elements: royaltyPercentages.map(pct => txb.pure.u8(pct)) }),
+          txb.makeMoveVec({ type: "address", elements: mappedRoyaltyRecipients }),
+          txb.makeMoveVec({ type: "u8", elements: mappedRoyaltyPercentages }),
           txb.pure.string(formData.basePrompt),
           txb.pure.string(formData.stylePrompt),
           txb.pure.string(walrusData.blobId),
@@ -86,11 +147,21 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
           txb.pure.string(formData.generationPrompt),
           txb.pure.string(formData.modelVersion),
           txb.pure.string(formData.generationParams),
-          txb.makeMoveVec({ type: "string", elements: attributeNames.map(name => txb.pure.string(name)) }),
-          txb.makeMoveVec({ type: "string", elements: attributeValues.map(value => txb.pure.string(value)) }),
+          txb.makeMoveVec({ type: "0x1::string::String", elements: mappedAttributeNames }),
+          txb.makeMoveVec({ type: "0x1::string::String", elements: mappedAttributeValues }),
           paymentCoin,
         ],
       });
+
+      // --- LOGGING TRANSACTION BLOCK ---
+      console.log("handleMint: Transaction block before signing:", txb.blockData);
+      try {
+        const transactionBlockBytes = await txb.build({ client: {} as SuiClient }); // Using dummy client for dry run build if needed for logging
+        console.log("handleMint: Transaction block bytes (for inspection):", transactionBlockBytes);
+      } catch (buildError) {
+        console.error("handleMint: Error building transaction block for logging:", buildError);
+      }
+      // -------------------------------
 
       await signAndExecute(
         {
