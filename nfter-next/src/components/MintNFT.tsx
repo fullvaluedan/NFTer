@@ -35,7 +35,7 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
     stylePrompt: '',
     generationPrompt: prompt, // Initial value
     modelVersion: 'sdxl-v1.0',
-    generationParams: '{}',
+    generationParams: '',
   });
 
   // --- ADDED useEffect TO UPDATE formData WHEN PROMPT OR ROLE CHANGES ---
