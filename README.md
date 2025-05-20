@@ -631,16 +631,6 @@ sui client call --package 0x2 --module kiosk --function list \
 
 MIT
 
-**DEVNET**
-
-```
-Summary of deployed assets:
-  Package ID:         0x4448d95a34e3d103f628fad9265358ea4802c661d9b107191912b30dddfff2ee
-  Collection ID:      0x48df38789f69e5e31cb6095fc282f54c51fc411fb5469e4b1f87161e2e224fba
-  TransferPolicy ID:  0x96b22d351b70fee01e1d35e45b1b2f7f8f983f038266f9df343b1ae94a6ff906
-  TransferPolicyCap ID: 0x8cc9663c39ab966a896ce09b9b87c2c79d205923528ea9aabbed7516116f3fb7
-```
-
 **TESTNET**
 
 ```
@@ -651,3 +641,70 @@ Summary of deployed assets:
   TransferPolicy ID:  0x0a83e27ba7bd2312b70182140ddfed1a407c091009954a343aa00a7cb971895e
   TransferPolicyCap ID: 0xa333dac2fe764fea113e3f8b34d6caffdd8ca17e42de58aa48e9b8a5415126ee
 ```
+
+## Setup Script
+
+The project includes a setup script (`docs/nft-steps/setup_sui_nft.sh`) that automates the deployment of the NFT collection on Sui. This script performs the following steps:
+
+1. **Package Publication**
+
+   - Publishes the Move package from the `move` directory
+   - Extracts and validates the package ID and publisher ID
+   - Uses a gas budget of 0.5 SUI for publication
+
+2. **Collection Initialization**
+
+   - Creates the NFT collection with predefined parameters:
+     - Name: "Offbrand Crypto"
+     - Description: "The official collection of Offbrand Crypto NFTs, uniquely generated and ready for the 8-Bit Oracle"
+     - Minting Fee: 0.001 SUI
+     - Prompt Update Fee: 0.001 SUI
+   - Generates and validates collection ID, transfer policy ID, and policy cap ID
+
+3. **Royalty Configuration**
+   - Sets up royalty rules for the collection:
+     - Royalty Rate: 5% (500 basis points)
+     - Minimum Royalty: 0.001 SUI
+
+### Prerequisites
+
+- Sui CLI installed and configured
+- `jq` command-line tool installed
+- Sufficient SUI tokens for gas fees
+
+### Usage
+
+```bash
+cd docs/nft-steps
+./setup_sui_nft.sh
+```
+
+### Output
+
+The script provides detailed output for each step and a final summary of all deployed asset IDs:
+
+- Package ID
+- Collection ID
+- Transfer Policy ID
+- Transfer Policy Cap ID
+
+### Error Handling
+
+The script includes comprehensive error checking:
+
+- Validates command outputs
+- Checks for empty or null responses
+- Provides detailed error messages
+- Ensures all required IDs are properly extracted
+
+### Configuration
+
+Key parameters can be modified in the script:
+
+- `PUBLISH_DIR`: Location of the Move package
+- `COLLECTION_NAME`: Name of the NFT collection
+- `COLLECTION_DESC`: Collection description
+- `MINT_FEE`: Cost to mint an NFT
+- `PROMPT_FEE`: Cost to update prompts
+- `ROYALTY_BP`: Royalty rate in basis points
+- `ROYALTY_MIN`: Minimum royalty amount
