@@ -119,7 +119,8 @@ module nfter::nfter {
         
         // Transfer the TransferPolicyCap to the admin
         transfer::public_transfer(policy_cap, ctx.sender());
-        transfer::transfer(collection, ctx.sender());
+        // SHARE THE COLLECTION OBJECT SO ANYONE CAN CALL ENTRY FUNCS WITH IT (e.g, mint)
+        transfer::share_object(collection);
     }
 
     /// Update the royalty rules for the collection

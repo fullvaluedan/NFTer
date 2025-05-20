@@ -87,11 +87,17 @@ export default function Home() {
   const [selectedRoleLabel, setSelectedRoleLabel] = useState<string>("")
   const [generationPrompts, setGenerationPrompts] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setOriginalImageUrl(event.target?.result as string)
+      }
+      reader.readAsDataURL(selectedFile)
     }
   }
 
@@ -111,6 +117,11 @@ export default function Home() {
     const droppedFile = e.dataTransfer.files?.[0]
     if (droppedFile && droppedFile.type.startsWith('image/')) {
       setFile(droppedFile)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setOriginalImageUrl(event.target?.result as string)
+      }
+      reader.readAsDataURL(droppedFile)
     } else {
       toast.error('Please drop an image file')
     }
@@ -261,68 +272,82 @@ export default function Home() {
         {generatedImages.length > 0 && (
           <div className="mt-6 space-y-4">
             <h5 className="text-center text-lg font-semibold">Your Transformed Images</h5>
-            <div className="rounded-lg bg-blue-500/10 p-4 text-center">
-              <p className="mb-0">
-                Your character has been transformed into <strong>{selectedRoleLabel}</strong>!
-              </p>
-            </div>
-            <Carousel className="w-full">
-              <CarouselContent>
-                {generatedImages.map((imageUrl, index) => (
-                  <CarouselItem key={index}>
-                    <div className="p-1">
-                      <div className="relative aspect-square overflow-hidden rounded-lg border">
-                        <Image
-                          src={imageUrl}
-                          alt={`Generated avatar ${index + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-center text-white">
-                          <p>Power Score: <span className={getScoreColor(imageScores[index])}>{imageScores[index]}</span></p>
+            <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
+              {/* Original image preview */}
+              {originalImageUrl && (
+                <div className="flex flex-col items-center w-full md:w-1/3">
+                  <div className="relative aspect-square w-full overflow-hidden rounded-lg border">
+                    <Image
+                      src={originalImageUrl}
+                      alt="Original uploaded"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="mt-2 text-center text-sm text-muted-foreground">Original Image</p>
+                </div>
+              )}
+              {/* Transformed images carousel */}
+              <div className="w-full md:w-2/3">
+                <Carousel className="w-full" opts={{ loop: true }}>
+                  <CarouselContent>
+                    {generatedImages.map((imageUrl, index) => (
+                      <CarouselItem key={index}>
+                        <div className="p-1">
+                          <div className="relative aspect-square overflow-hidden rounded-lg border">
+                            <Image
+                              src={imageUrl}
+                              alt={`Generated avatar ${index + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-center text-white">
+                              <p>Power Score: <span className={getScoreColor(imageScores[index])}>{imageScores[index]}</span></p>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex justify-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(imageUrl, '_blank')}
+                            >
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              View Full Size
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const link = document.createElement('a')
+                                link.href = imageUrl
+                                link.download = `avatar-${index + 1}.png`
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                              }}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Download
+                            </Button>
+                          </div>
+                          <div className="mt-4">
+                            <WalrusUpload
+                              imageUrl={imageUrl}
+                              collectionId={process.env.NEXT_PUBLIC_COLLECTION_ID || ''}
+                              packageId={process.env.NEXT_PUBLIC_PACKAGE_ID || ''}
+                              role={selectedRoleLabel}
+                              prompt={generationPrompts[index] || ""}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="mt-2 flex justify-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(imageUrl, '_blank')}
-                        >
-                          <ExternalLink className="mr-2 h-4 w-4" />
-                          View Full Size
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const link = document.createElement('a')
-                            link.href = imageUrl
-                            link.download = `avatar-${index + 1}.png`
-                            document.body.appendChild(link)
-                            link.click()
-                            document.body.removeChild(link)
-                          }}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
-                      </div>
-                      <div className="mt-4">
-                        <WalrusUpload
-                          imageUrl={imageUrl}
-                          collectionId={process.env.NEXT_PUBLIC_COLLECTION_ID || ''}
-                          packageId={process.env.NEXT_PUBLIC_PACKAGE_ID || ''}
-                          role={selectedRoleLabel} // Removed 'role' prop
-                          prompt={generationPrompts[index] || ""}
-                        />
-                      </div>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              </div>
+            </div>
           </div>
         )}
 
