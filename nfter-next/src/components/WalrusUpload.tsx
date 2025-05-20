@@ -4,8 +4,9 @@ import { useCurrentAccount } from '@mysten/dapp-kit';
 import { toast } from 'sonner';
 import { Upload, ExternalLink, Wallet } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Ensure useEffect is imported
 import { ConnectButton } from '@mysten/dapp-kit';
+import { MintNFT } from './MintNFT';
 
 interface WalrusUploadProps {
   imageUrl: string;
@@ -16,9 +17,20 @@ interface WalrusUploadProps {
     suiRefType: string;
     endEpoch: number;
   }) => void;
+  collectionId: string;
+  packageId: string;
+  role: string;
+  prompt: string;
 }
 
-export function WalrusUpload({ imageUrl, onUploadComplete }: WalrusUploadProps) {
+export function WalrusUpload({
+  imageUrl,
+  onUploadComplete,
+  collectionId,
+  packageId,
+  role,
+  prompt,
+}: WalrusUploadProps) {
   const account = useCurrentAccount();
   const { upload, isLoading, error } = useWalrusUpload({
     sendTo: account?.address,
@@ -28,6 +40,24 @@ export function WalrusUpload({ imageUrl, onUploadComplete }: WalrusUploadProps) 
     url: string;
   } | null>(null);
 
+  // Existing useEffect for initial props
+  useEffect(() => {
+    console.log('WalrusUpload: Props received -');
+    console.log('  imageUrl:', imageUrl);
+    console.log('  collectionId:', collectionId);
+    console.log('  packageId:', packageId);
+    console.log('  role (initial):', role);
+    console.log('  prompt (initial):', prompt);
+  }, [imageUrl, collectionId, packageId, role, prompt]);
+
+  // NEW useEffect to log what's passed to MintNFT,
+  // triggered when uploadedImage changes (i.e., after successful upload)
+  useEffect(() => {
+    if (uploadedImage) {
+      console.log('WalrusUpload: Data for MintNFT - role:', role, 'prompt:', prompt);
+    }
+  }, [uploadedImage, role, prompt]); // Dependencies: uploadedImage, and the props it passes
+
   const handleUpload = async () => {
     if (!account) {
       toast.error('Please connect your wallet first');
@@ -35,26 +65,29 @@ export function WalrusUpload({ imageUrl, onUploadComplete }: WalrusUploadProps) 
     }
 
     try {
-      // Fetch the image and convert to File
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const file = new File([blob], 'avatar.png', { type: 'image/png' });
 
       const result = await upload(file);
       toast.success('Successfully uploaded to Walrus!');
-      
-      // Store the uploaded image info
+
       setUploadedImage({
         blobId: result.blobId,
         url: result.url,
       });
-      
+
       onUploadComplete?.(result);
     } catch (err) {
       console.error('Failed to upload to Walrus:', err);
       toast.error('Failed to upload to Walrus');
     }
   };
+
+  // Add this useEffect to log the props just before MintNFT is rendered.
+  useEffect(() => {
+    console.log('WalrusUpload: Props just before MintNFT - role:', role, 'prompt:', prompt);
+  }, [uploadedImage, collectionId, packageId, role, prompt]);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -76,9 +109,7 @@ export function WalrusUpload({ imageUrl, onUploadComplete }: WalrusUploadProps) 
               disabled={isLoading}
               className="w-full"
             >
-              {isLoading ? (
-                'Uploading...'
-              ) : (
+              {isLoading ? 'Uploading...' : (
                 <>
                   <Upload className="mr-2 h-4 w-4" />
                   Upload to Walrus
@@ -111,11 +142,18 @@ export function WalrusUpload({ imageUrl, onUploadComplete }: WalrusUploadProps) 
               View on Walrus
             </Button>
           </div>
+
+          {/* Removed the direct console.log from here */}
+          <MintNFT
+            walrusData={uploadedImage}
+            collectionId={collectionId}
+            packageId={packageId}
+            role={role}
+            prompt={prompt}
+          />
         </div>
       )}
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
-} 
+}

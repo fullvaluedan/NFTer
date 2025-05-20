@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -18,7 +18,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { toast } from 'sonner'
-import { Download } from 'lucide-react'
+import { Download, ExternalLink } from 'lucide-react'
 import { WalrusUpload } from '@/components/WalrusUpload'
 
 const ROLES = [
@@ -85,6 +85,7 @@ export default function Home() {
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
   const [imageScores, setImageScores] = useState<number[]>([])
   const [selectedRoleLabel, setSelectedRoleLabel] = useState<string>("")
+  const [generationPrompts, setGenerationPrompts] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,6 +136,7 @@ export default function Home() {
 
       if (!response.ok) {
         const error = await response.json()
+        console.log("Error:", response)
         throw new Error(error.error || 'Failed to generate avatar')
       }
 
@@ -148,10 +150,26 @@ export default function Home() {
       setGeneratedImages(data.image_urls)
       setImageScores(data.scores || Array(data.image_urls.length).fill(50))
       setSelectedRoleLabel(data.role || "random")
+      setGenerationPrompts(data.prompts || Array(data.image_urls.length).fill(data.prompt || ""))
       toast.success('Your avatars have been generated!')
     } catch (err) {
+      let errorMsg = 'Failed to generate avatar. Please try again.'
+      if (err instanceof Error) {
+        errorMsg = err.message
+      }
+      // If the error is a Response object (from fetch), try to parse the JSON error message
+      if (err && typeof err === 'object' && 'response' in err && err.response instanceof Response) {
+        try {
+          const dataError = await (err.response as Response).json()
+          if (dataError && typeof dataError === 'object' && 'error' in dataError && typeof dataError.error === 'string') {
+            errorMsg = dataError.error
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+      }
       console.error("Error generating avatar:", err)
-      toast.error(err instanceof Error ? err.message : 'Failed to generate avatar. Please try again.')
+      toast.error(errorMsg)
     } finally {
       setIsLoading(false)
     }
@@ -197,8 +215,8 @@ export default function Home() {
             </label>
             <div
               className={`relative rounded-lg border-2 border-dashed p-8 text-center transition-colors
-                ${isDragging 
-                  ? 'border-green-500 bg-green-500/10' 
+                ${isDragging
+                  ? 'border-green-500 bg-green-500/10'
                   : 'border-blue-500 bg-blue-500/10 hover:bg-blue-500/20'
                 }`}
               onDragOver={handleDragOver}
@@ -248,64 +266,63 @@ export default function Home() {
                 Your character has been transformed into <strong>{selectedRoleLabel}</strong>!
               </p>
             </div>
-
-            <div className="rounded-lg border border-border bg-card p-6">
-              <div className="text-center">
-                <Carousel className="mx-auto max-w-[400px]">
-                  <CarouselContent>
-                    {generatedImages.map((imageUrl, index) => (
-                      <CarouselItem key={index}>
-                        <div className="relative aspect-square">
-                          <Image
-                            src={imageUrl}
-                            alt={`Generated avatar ${index + 1}`}
-                            fill
-                            className="object-cover rounded-lg"
-                          />
+            <Carousel className="w-full">
+              <CarouselContent>
+                {generatedImages.map((imageUrl, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-1">
+                      <div className="relative aspect-square overflow-hidden rounded-lg border">
+                        <Image
+                          src={imageUrl}
+                          alt={`Generated avatar ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-center text-white">
+                          <p>Power Score: <span className={getScoreColor(imageScores[index])}>{imageScores[index]}</span></p>
                         </div>
-                        <div className="mt-2 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`h-2 w-2 rounded-full ${getScoreColor(imageScores[index])}`} />
-                            <span className="text-sm text-muted-foreground">
-                              Score: {imageScores[index]}
-                            </span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(imageUrl, '_blank')}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="mt-4">
-                          <WalrusUpload 
-                            imageUrl={imageUrl}
-                            onUploadComplete={(data) => {
-                              console.log('Uploaded to Walrus:', data);
-                              toast.success('Image uploaded to Walrus successfully!');
-                            }}
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="left-2" />
-                  <CarouselNext className="right-2" />
-                </Carousel>
-
-                <a
-                  href={generatedImages[0]}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
-                >
-                  <Download className="h-4 w-4" />
-                  Download Image
-                </a>
-              </div>
-            </div>
+                      </div>
+                      <div className="mt-2 flex justify-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(imageUrl, '_blank')}
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          View Full Size
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const link = document.createElement('a')
+                            link.href = imageUrl
+                            link.download = `avatar-${index + 1}.png`
+                            document.body.appendChild(link)
+                            link.click()
+                            document.body.removeChild(link)
+                          }}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          Download
+                        </Button>
+                      </div>
+                      <div className="mt-4">
+                        <WalrusUpload
+                          imageUrl={imageUrl}
+                          collectionId={process.env.NEXT_PUBLIC_COLLECTION_ID || ''}
+                          packageId={process.env.NEXT_PUBLIC_PACKAGE_ID || ''}
+                          role={selectedRoleLabel} // Removed 'role' prop
+                          prompt={generationPrompts[index] || ""}
+                        />
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         )}
 
