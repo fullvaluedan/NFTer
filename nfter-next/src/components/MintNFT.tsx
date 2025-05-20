@@ -153,6 +153,33 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
         ],
       });
 
+      // --- RECONSTRUCTION LOGGING FOR SUI CLIENT CALL ---
+      console.log("--- SUI Client Call Reconstruction ---");
+      console.log(`sui client call \\
+        --package ${packageId} \\
+        --module nfter \\
+        --function mint_nft \\
+        --args \\
+          ${collectionId} \\
+          "${formData.name}" \\
+          "${formData.description}" \\
+          '${JSON.stringify(royaltyRecipients)}' \\
+          '${JSON.stringify(royaltyPercentages)}' \\
+          "${formData.basePrompt}" \\
+          "${formData.stylePrompt}" \\
+          "${walrusData.blobId}" \\
+          "${walrusData.url}" \\
+          "${formData.generationPrompt.replace(/\n/g, '\\n')}" \\
+          "${formData.modelVersion}" \\
+          "${formData.generationParams}" \\
+          '${JSON.stringify(attributeNames.map(s => s.toString()))}' \\
+          '${JSON.stringify(attributeValues.map(s => s.toString()))}' \\
+          <PAYMENT_COIN_OBJECT_ID>`);
+      console.log("--- End SUI Client Call Reconstruction ---");
+      console.log("Note: For <PAYMENT_COIN_OBJECT_ID>, use 'sui client gas' to find a suitable coin ID you own.");
+      console.log("Note: The txb.gas object used by the dApp for this transaction would be (for reference):", txb.gas);
+      // --------------------------------------------------
+
       // --- LOGGING TRANSACTION BLOCK ---
       console.log("handleMint: Transaction block before signing:", txb.blockData);
       try {
