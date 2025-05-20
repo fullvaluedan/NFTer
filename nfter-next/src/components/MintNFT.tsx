@@ -121,18 +121,12 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
       });
       console.log("handleMint: Elements for royaltyPercentages vector:", mappedRoyaltyPercentages);
 
-      const mappedAttributeNames = attributeNames.map(name => {
-        console.log("handleMint: txb.pure.string for attributeName:", name);
-        return txb.pure.string(name);
-      });
-      console.log("handleMint: Elements for attributeNames vector:", mappedAttributeNames);
+      // Create string vectors for attributes
+      const attributeNameStrings = attributeNames.map(name => txb.pure.string(name));
+      const attributeValueStrings = attributeValues.map(value => txb.pure.string(value));
 
-      const mappedAttributeValues = attributeValues.map(value => {
-        console.log("handleMint: txb.pure.string for attributeValue:", value);
-        return txb.pure.string(value);
-      });
-      console.log("handleMint: Elements for attributeValues vector:", mappedAttributeValues);
-      // --- END LOGGING BEFORE txb.makeMoveVec ---
+      console.log("handleMint: Elements for attributeNames vector:", attributeNameStrings);
+      console.log("handleMint: Elements for attributeValues vector:", attributeValueStrings);
 
       txb.moveCall({
         target: `${packageId}::nfter::mint_nft`,
@@ -148,8 +142,8 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
           txb.pure.string(formData.generationPrompt),
           txb.pure.string(formData.modelVersion),
           txb.pure.string(formData.generationParams),
-          txb.makeMoveVec({ type: "0x1::string::String", elements: mappedAttributeNames }),
-          txb.makeMoveVec({ type: "0x1::string::String", elements: mappedAttributeValues }),
+          txb.makeMoveVec({ type: "0x1::string::String", elements: attributeNameStrings }),
+          txb.makeMoveVec({ type: "0x1::string::String", elements: attributeValueStrings }),
           paymentCoin,
         ],
       });
