@@ -74,13 +74,13 @@ module nfter::nfter {
         let publisher = package::claim(otw, ctx);
         let mut display = display::new<OffbrandNFT>(&publisher, ctx);
 
-        display.add(string::utf8(b"name"), string::utf8(b"{name}"));
+        display.add(string::utf8(b"name"), string::utf8(b"OFFBRAND Crypto #{mint_number}"));
         display.add(string::utf8(b"description"), string::utf8(b"{description}"));
         display.add(string::utf8(b"mint_number"), string::utf8(b"{mint_number}"));
-        display.add(string::utf8(b"image_url"), string::utf8(b"https://walrus.xyz/blob/{walrus_blob_id}"));
-        display.add(string::utf8(b"generation_prompt"), string::utf8(b"{generation_prompt}"));
-        display.add(string::utf8(b"model_version"), string::utf8(b"{model_version}"));
-        display.add(string::utf8(b"created_at"), string::utf8(b"{created_at}"));
+        display.add(string::utf8(b"image_url"), string::utf8(b"https://walrus.xyz/blob/{df(image_metadata)::walrus_blob_id}"));
+        display.add(string::utf8(b"generation_prompt"), string::utf8(b"{df(image_metadata)::generation_prompt}"));
+        display.add(string::utf8(b"model_version"), string::utf8(b"{df(image_metadata)::model_version}"));
+        display.add(string::utf8(b"created_at"), string::utf8(b"{df(image_metadata)::created_at}"));
         display.add(string::utf8(b"project_url"), string::utf8(b"https://nfter.bid"));
         display.add(string::utf8(b"creator"), string::utf8(b"{creator}"));
         
@@ -177,7 +177,6 @@ module nfter::nfter {
 
     public entry fun mint_nft(
         collection: &mut OffbrandCollection,
-        name: String,
         description: String,
         royalty_recipients: vector<address>,
         royalty_percentages: vector<u8>,
@@ -212,9 +211,11 @@ module nfter::nfter {
         };
 
         let nft_id = object::new(ctx);
+        let hardcoded_nft_name = string::utf8(b"Offbrand Crypto");
+
         let mut nft = OffbrandNFT {
             id: nft_id,
-            name,
+            name: hardcoded_nft_name,
             description,
             creator: ctx.sender(),
             mint_number: collection.total_minted + 1,

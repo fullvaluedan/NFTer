@@ -136,7 +136,6 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
         target: `${packageId}::nfter::mint_nft`,
         arguments: [
           txb.object(collectionId),
-          txb.pure.string(formData.name),
           txb.pure.string(formData.description),
           txb.makeMoveVec({ type: "address", elements: mappedRoyaltyRecipients }),
           txb.makeMoveVec({ type: "u8", elements: mappedRoyaltyPercentages }),
@@ -161,7 +160,6 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
         --function mint_nft \\
         --args \\
           ${collectionId} \\
-          "${formData.name}" \\
           "${formData.description}" \\
           '${JSON.stringify(royaltyRecipients)}' \\
           '${JSON.stringify(royaltyPercentages)}' \\
