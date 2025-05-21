@@ -204,7 +204,7 @@ export default function Home() {
           height={50}
           className="mx-auto" // Add mx-auto here
         />
-        <p className="text-lg sm:text-xl text-foreground">
+        <p className="text-lg sm:text-xl text-bold">
           Transform your photos into unique anime-style characters using AI
         </p>
       </div>

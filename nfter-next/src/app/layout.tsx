@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Inter } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import "./globals.css";
 import "@mysten/dapp-kit/dist/index.css";
 import { Toaster } from "sonner";
@@ -8,8 +8,8 @@ import { Providers } from "@/components/Providers";
 import { WalletConnect } from "@/components/WalletConnect";
 
 
-const mainFont  = Inter({
-  // weight: '400',
+const mainFont  = Roboto({
+  weight: '400',
   subsets: ['latin']
 })
 
@@ -46,6 +46,16 @@ export default function RootLayout({
             <main>{children}</main>
           </div>
           <Toaster />
+          <footer className="py-8 text-center text-sm text-muted-foreground">
+            Crafted with ❤️ by{" "}
+            <Link href="https://digitalrain.studio" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              digitalrain.studio
+            </Link>
+            {" "}and{" "}
+            <Link href="https://x.com/fullvaluedan" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              x.com/fullvaluedan
+            </Link>
+          </footer>
         </Providers>
       </body>
     </html>
