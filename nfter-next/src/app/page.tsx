@@ -343,7 +343,7 @@ export default function Home() {
                               collectionId={process.env.NEXT_PUBLIC_COLLECTION_ID || ''}
                               packageId={process.env.NEXT_PUBLIC_PACKAGE_ID || ''}
                               role={selectedRoleLabel}
-                              prompt={generationPrompts[index] || ""}
+                              prompt={generationPrompts[index] || ""}                              
                             />
                           </div>
                         </div>

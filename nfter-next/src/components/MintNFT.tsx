@@ -18,11 +18,10 @@ interface MintNFTProps {
   collectionId: string;
   packageId: string;
   role: string;
-  prompt: string;
-  onMinted: (objectId: string) => void;
+  prompt: string;  
 }
 
-export function MintNFT({ walrusData, collectionId, packageId, role, prompt, onMinted }: MintNFTProps) {
+export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: MintNFTProps) {
   const account = useCurrentAccount();
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
@@ -249,11 +248,11 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt, onM
                 if (newNftId) {
                   toast.success('NFT Minted Successfully!');
                   setMintedNftObjectId(newNftId);
-                  if (typeof onMinted === 'function') {
-                    onMinted(newNftId);
-                  } else {
-                    console.warn('MintNFT: onMinted prop was not a function.');
-                  }
+                  // if (typeof onMinted === 'function') {
+                  //   onMinted(newNftId);
+                  // } else {
+                  //   console.warn('MintNFT: onMinted prop was not a function.');
+                  // }
                 } else {
                   console.warn("Could not find the minted NFT object ID in transaction details even after confirmation.");
                   toast.error("Mint confirmed, but could not retrieve specific NFT details.");
