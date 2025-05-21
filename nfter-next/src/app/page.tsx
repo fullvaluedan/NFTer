@@ -195,12 +195,19 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
       <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
-        <div className="text-center space-y-3 sm:space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-bold text-blue-600">NFTer</h1>
-          <p className="text-lg sm:text-xl text-gray-600">
-            Transform your photos into unique anime-style characters using AI
-          </p>
-        </div>
+      <div className="text-center space-y-3 sm:space-y-4">
+        {/* <h1 className="text-3xl sm:text-4xl font-bold text-blue-600">NFTer</h1> */}
+        <Image
+          src="/offbrand.png"
+          alt="Main Logo"
+          width={200}
+          height={50}
+          className="mx-auto" // Add mx-auto here
+        />
+        <p className="text-lg sm:text-xl text-foreground">
+          Transform your photos into unique anime-style characters using AI
+        </p>
+      </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
