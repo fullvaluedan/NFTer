@@ -1,36 +1,28 @@
 'use client';
 
-import { ConnectButton, useCurrentAccount, useCurrentWallet, useSuiClientQuery } from '@mysten/dapp-kit';
-import { SLUSH_WALLET_NAME } from '@mysten/slush-wallet';
-import { NetworkSwitcher } from './NetworkSwitcher';
+import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit';
+// import { SLUSH_WALLET_NAME } from '@mysten/slush-wallet';
+import { NetworkSwitcher } from './NetworkSwitcher'; // Assuming this component is appropriately styled or compact
 
 export function WalletConnect() {
   const account = useCurrentAccount();
-  const { currentWallet } = useCurrentWallet();
-  const isSlushWallet = currentWallet?.name === SLUSH_WALLET_NAME;
-  
-  // Get detailed network info
-  const { data: chainId } = useSuiClientQuery('getChainIdentifier');
+  // const { currentWallet } = useCurrentWallet();
+  // const isSlushWallet = currentWallet?.name === SLUSH_WALLET_NAME;
+  // const { data: chainId } = useSuiClientQuery('getChainIdentifier');
+
+  // User's original class for ConnectButton to maintain consistent styling
+  const connectButtonClassName = "!bg-blue-600 hover:!bg-blue-700";
 
   return (
     <div className="flex items-center gap-4">
       {account ? (
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            {account.address.slice(0, 6)}...{account.address.slice(-4)}
-            {isSlushWallet && <span className="ml-2 text-xs text-blue-500">(Slush)</span>}            
-            {chainId && (
-              <span className="ml-2 text-xs text-yellow-500">
-                (Chain: {String(chainId)})
-              </span>
-            )}
-          </span>
+        <div className="flex flex-col sm:flex-row items-center gap-2">        
           <NetworkSwitcher />
-          <ConnectButton className="!bg-blue-600 hover:!bg-blue-700" />
+          <ConnectButton className={connectButtonClassName} />
         </div>
       ) : (
-        <ConnectButton className="!bg-blue-600 hover:!bg-blue-700" />
+        <ConnectButton className={connectButtonClassName} />
       )}
     </div>
   );
-} 
+}

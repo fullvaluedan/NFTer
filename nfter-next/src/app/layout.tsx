@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -26,7 +27,14 @@ export default function RootLayout({
             <header className="border-b">
               <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-blue-600">NFTer</h1>
+                  {/* Section for Logo (top-left within this content block) */}
+                  <div className="self-start"> {/* Ensures this block is at the start if parent is flex/grid; otherwise, it's a standard block */}
+                    <Link href="/">
+                      <h1 className="text-3xl sm:text-4xl font-bold text-blue-600 cursor-pointer hover:text-blue-700 transition-colors w-max">
+                        NFTer
+                      </h1>
+                    </Link>
+                  </div>
                   <WalletConnect />
                 </div>
               </div>
