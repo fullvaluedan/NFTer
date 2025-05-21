@@ -379,11 +379,20 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt, onM
         </div>
       )}
 
+      {/* Detailed success message, appears after objectId is confirmed */}
       {mintedNftObjectId && (
         <div className="mt-4 text-center p-3 border border-green-300 bg-green-50 rounded-lg">
-          <p className="text-lg font-semibold text-green-700">
+          <p className="text-lg font-semibold text-green-700 mb-2">
             🎉 NFT Minted Successfully! 🎉
           </p>
+          <Link
+            href={`https://testnet.suivision.xyz/object/${mintedNftObjectId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:text-blue-700 underline"
+          >
+            View Your NFT on SuiVision
+          </Link>
         </div>
       )}
     </div>
