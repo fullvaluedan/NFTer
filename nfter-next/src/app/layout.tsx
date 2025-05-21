@@ -8,7 +8,7 @@ import { Providers } from "@/components/Providers";
 import { WalletConnect } from "@/components/WalletConnect";
 
 
-const anton  = Inter({
+const mainFont  = Inter({
   // weight: '400',
   subsets: ['latin']
 })
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={anton.className}>
+      <body className={mainFont.className}>
         <Providers>
           <div className="min-h-screen bg-background">
             <header className="border-b">
