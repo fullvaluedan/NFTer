@@ -10,7 +10,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -66,3 +65,9 @@ htmlcov/
 # Replit specific
 .replit
 .vercel
+flatland
+bin
+
+# Private individual user cursor rules
+.cursor
+xnotes

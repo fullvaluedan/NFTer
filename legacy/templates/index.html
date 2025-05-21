@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFTer - AI Portrait Generator</title>
+  <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+  <style>
+    .result-image {
+      max-width: 100%;
+      margin-top: 15px;
+      border-radius: 8px;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #0dcaf0;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <header class="mb-5 text-center">
+          <h1 class="mb-3 text-warning">NFTer</h1>
+          <p class="lead">Add yourself to any community</p>
+        </header>
+
+        <div class="card bg-dark border-info mb-4">
+          <div class="card-body">
+            <form id="upload-form" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label for="role-select" class="form-label">Choose a role (or leave random)</label>
+                <select class="form-select" id="role-select" name="selected_role">
+                  <option value="">Random (weighted)</option>
+                  <option>Anbu Black Ops</option>
+                  <option>Rogue ninja</option>
+                  <option>Akatsuki member</option>
+                  <option>young Genin</option>
+                  <option>Chūnin</option>
+                  <option>elite Jōnin</option>
+                  <option>Hidden Leaf teacher</option>
+                  <option>Hokage</option>
+                  <option>civilian villager</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="image" class="form-label">Select an image to transform</label>
+                <input class="form-control" type="file" id="image" name="image" accept="image/*" required>
+              </div>
+              <button type="submit" class="btn btn-warning w-100">Transform Image</button>
+            </form>
+            
+            <div id="loading" class="loading">
+              <p>Transforming your image...</p>
+              <div class="loader"></div>
+              <p class="text-muted">This might take up to a minute depending on the image size.</p>
+            </div>
+            
+            <div id="result" class="mt-4 text-center"></div>
+          </div>
+        </div>
+        
+        <div class="card bg-dark border-secondary">
+          <div class="card-body">
+            <h5 class="card-title">About this tool</h5>
+            <p class="card-text">This tool uses advanced AI technology to transform your photos and add you to any community. The transformation is powered by cutting-edge image generation models.</p>
+            <p class="card-text">The process may take some time depending on the complexity of your image and the current server load.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("upload-form").onsubmit = async (e) => {
+      e.preventDefault();
+      
+      // Show loading state
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("result").innerHTML = "";
+      
+      const formData = new FormData(e.target);
+      
+      try {
+        const res = await fetch("/generate", {
+          method: "POST",
+          body: formData
+        });
+        
+        const data = await res.json();
+        
+        // Hide loading state
+        document.getElementById("loading").style.display = "none";
+        
+        if (data.error) {
+          document.getElementById("result").innerHTML = `
+            <div class="alert alert-danger">${data.error}</div>
+          `;
+        } else {
+          const images = Array.isArray(data.image_urls) ? data.image_urls : [data.image_urls];
+          const role = data.role || "fantasy character";
+          const scores = data.scores || Array(images.length).fill(50);
+          
+          let resultHTML = `
+            <h5 class="mb-3">Your Transformed Image</h5>
+            <div class="alert alert-info">
+              <p class="mb-0">Your character has been transformed into <strong>${role}</strong>!</p>
+            </div>
+          `;
+          
+          images.forEach((url, index) => {
+            const score = scores[index];
+            let scoreClass = "bg-warning";
+            if (score >= 80) scoreClass = "bg-success";
+            else if (score <= 30) scoreClass = "bg-danger";
+            
+            resultHTML += `
+              <div class="mb-4 card bg-dark border-secondary">
+                <div class="card-body text-center">
+                  <img src="${url}" class="result-image mb-3" alt="Transformed Image">
+                  <div class="mb-3">
+                    <h6>Power Level: ${score}%</h6>
+                    <div class="progress" style="height: 10px;">
+                      <div class="progress-bar ${scoreClass}" role="progressbar" style="width: ${score}%"
+                        aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                  <div class="mt-2">
+                    <a href="${url}" class="btn btn-success btn-sm" download target="_blank">Download Image</a>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          
+          document.getElementById("result").innerHTML = resultHTML;
+        }
+      } catch (error) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("result").innerHTML = `
+          <div class="alert alert-danger">An error occurred while processing your request. Please try again.</div>
+        `;
+      }
+    };
+  </script>
+</body>
+</html>

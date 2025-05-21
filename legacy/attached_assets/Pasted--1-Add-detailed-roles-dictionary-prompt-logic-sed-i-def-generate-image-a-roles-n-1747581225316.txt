@@ -1,0 +1,23 @@
+# 1. Add detailed roles dictionary + prompt logic
+sed -i '/def generate_image()/a\
+    roles = [\n\
+        {"label": "civilian villager", "description": "wearing modest clothes in browns or greens, soft smile, no headband, background of wooden buildings"},\n\
+        {"label": "young Genin", "description": "Leaf headband, fingerless gloves, basic ninja outfit, hopeful look, trees in the background"},\n\
+        {"label": "Chūnin", "description": "green flak jacket, confident expression, short cropped hair, mission-ready"},\n\
+        {"label": "elite Jōnin", "description": "ninja headband with battle-ready gear, focused intense eyes, scars or facial detail"},\n\
+        {"label": "Anbu Black Ops", "description": "animal mask covering face, dark armor, mysterious vibe, misty background"},\n\
+        {"label": "Rogue ninja", "description": "scratched headband, torn cloak, rebellious eyes, cloudy background"},\n\
+        {"label": "Akatsuki member", "description": "black cloak with red clouds, intense expression, rainy or moody background"},\n\
+        {"label": "Hidden Leaf teacher", "description": "casual outfit with clipboard or scroll, warm friendly expression, classroom setting"},\n\
+        {"label": "Hokage", "description": "traditional Hokage robes, formal headpiece, wise expression, background of stone faces"}\n\
+    ]\n\
+    selected = random.choice(roles)\n\
+    selected_role = selected["label"]\n\
+    role_desc = selected["description"]\n\
+    prompt_text = f"""Convert this person into a character from the Naruto anime. Keep the original facial structure, but draw them in the official Naruto anime art style. Make it a close-up portrait with soft anime lighting, cel-shading, and thick outlines. This character is a {selected_role} from the Hidden Leaf Village — {role_desc}. Use vivid colors and a soft, painterly anime background."""' main.py
+
+# 2. Set prompt and outputs in both replicate blocks
+sed -i 's/"prompt": "[^"]*",/"prompt": prompt_text,\n                "num_outputs": 3,/g' main.py
+
+# 3. Restart the server
+python3 main.py

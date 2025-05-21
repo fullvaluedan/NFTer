@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -18,7 +18,8 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { toast } from 'sonner'
-import { Download } from 'lucide-react'
+import { Download, ExternalLink } from 'lucide-react'
+import { WalrusUpload } from '@/components/WalrusUpload'
 
 const ROLES = [
   {
@@ -84,12 +85,19 @@ export default function Home() {
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
   const [imageScores, setImageScores] = useState<number[]>([])
   const [selectedRoleLabel, setSelectedRoleLabel] = useState<string>("")
+  const [generationPrompts, setGenerationPrompts] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setOriginalImageUrl(event.target?.result as string)
+      }
+      reader.readAsDataURL(selectedFile)
     }
   }
 
@@ -109,6 +117,11 @@ export default function Home() {
     const droppedFile = e.dataTransfer.files?.[0]
     if (droppedFile && droppedFile.type.startsWith('image/')) {
       setFile(droppedFile)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setOriginalImageUrl(event.target?.result as string)
+      }
+      reader.readAsDataURL(droppedFile)
     } else {
       toast.error('Please drop an image file')
     }
@@ -134,6 +147,7 @@ export default function Home() {
 
       if (!response.ok) {
         const error = await response.json()
+        console.log("Error:", response)
         throw new Error(error.error || 'Failed to generate avatar')
       }
 
@@ -147,10 +161,26 @@ export default function Home() {
       setGeneratedImages(data.image_urls)
       setImageScores(data.scores || Array(data.image_urls.length).fill(50))
       setSelectedRoleLabel(data.role || "random")
+      setGenerationPrompts(data.prompts || Array(data.image_urls.length).fill(data.prompt || ""))
       toast.success('Your avatars have been generated!')
     } catch (err) {
+      let errorMsg = 'Failed to generate avatar. Please try again.'
+      if (err instanceof Error) {
+        errorMsg = err.message
+      }
+      // If the error is a Response object (from fetch), try to parse the JSON error message
+      if (err && typeof err === 'object' && 'response' in err && err.response instanceof Response) {
+        try {
+          const dataError = await (err.response as Response).json()
+          if (dataError && typeof dataError === 'object' && 'error' in dataError && typeof dataError.error === 'string') {
+            errorMsg = dataError.error
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+      }
       console.error("Error generating avatar:", err)
-      toast.error(err instanceof Error ? err.message : 'Failed to generate avatar. Please try again.')
+      toast.error(errorMsg)
     } finally {
       setIsLoading(false)
     }
@@ -163,20 +193,27 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-blue-600">NFTer</h1>
-          <p className="text-xl text-gray-600">
-            Transform your photos into unique anime-style characters using AI
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
+      <div className="text-center space-y-3 sm:space-y-4">
+        {/* <h1 className="text-3xl sm:text-4xl font-bold text-blue-600">NFTer</h1> */}
+        <Image
+          src="/offbrand.png"
+          alt="Main Logo"
+          width={200}
+          height={50}
+          className="mx-auto" // Add mx-auto here
+        />
+        <p className="text-lg sm:text-xl text-bold">
+          Transform your photos into unique anime-style characters using AI
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium">Choose a role</label>
+            <label className="block tracking-wide">Choose a role</label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a role (or leave random)" />
               </SelectTrigger>
               <SelectContent>
@@ -191,13 +228,13 @@ export default function Home() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">
+            <label className="block">
               Select an image to transform
             </label>
             <div
               className={`relative rounded-lg border-2 border-dashed p-8 text-center transition-colors
-                ${isDragging 
-                  ? 'border-green-500 bg-green-500/10' 
+                ${isDragging
+                  ? 'border-green-500 bg-green-500/10'
                   : 'border-blue-500 bg-blue-500/10 hover:bg-blue-500/20'
                 }`}
               onDragOver={handleDragOver}
@@ -216,9 +253,23 @@ export default function Home() {
                   Drag and drop your image here, or click to select
                 </p>
                 {file && (
-                  <p className="text-sm font-medium">
-                    Selected: {file.name}
-                  </p>
+                  <>
+                    <p className="">
+                      Selected: {file.name}
+                    </p>
+                    {originalImageUrl && (
+                      <div className="relative aspect-square w-full max-w-[150px] sm:max-w-[200px] mx-auto overflow-hidden rounded-lg border mt-2 sm:mt-3">
+                        <Image
+                          src={originalImageUrl}
+                          alt="Original image preview"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 150px, 200px"
+                          priority
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -230,81 +281,89 @@ export default function Home() {
         </form>
 
         {isLoading && (
-          <div className="mt-6 text-center">
-            <p>Transforming your image...</p>
-            <div className="mx-auto my-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-            <p className="text-sm text-muted-foreground">
-              This might take up to a minute depending on the image size.
-            </p>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-sm text-muted-foreground">Generating your anime character...</p>
           </div>
         )}
 
         {generatedImages.length > 0 && (
-          <div className="mt-6 space-y-4">
-            <h5 className="text-center text-lg font-semibold">Your Transformed Images</h5>
-            <div className="rounded-lg bg-blue-500/10 p-4 text-center">
-              <p className="mb-0">
-                Your character has been transformed into <strong>{selectedRoleLabel}</strong>!
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-border bg-card p-6">
-              <div className="text-center">
-                <Carousel className="mx-auto max-w-[400px]">
-                  <CarouselContent>
-                    {generatedImages.map((imageUrl, index) => (
-                      <CarouselItem key={index}>
-                        <div className="relative aspect-square">
-                          <Image
-                            src={imageUrl}
-                            alt={`Generated avatar ${index + 1}`}
-                            fill
-                            className="object-cover rounded-lg"
-                          />
-                        </div>
-                        <div className="mt-2 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`h-2 w-2 rounded-full ${getScoreColor(imageScores[index])}`} />
-                            <span className="text-sm text-muted-foreground">
-                              Score: {imageScores[index]}
-                            </span>
+          <div className="space-y-4">
+            <div className="relative">
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {generatedImages.map((imageUrl, index) => (
+                    <CarouselItem key={index}>
+                      <div className="p-1">
+                        <div className="space-y-4">
+                          <div className="relative aspect-square w-full overflow-hidden rounded-lg border">
+                            <Image
+                              src={imageUrl}
+                              alt={`Generated avatar ${index + 1}`}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-center">
+                              <p className="text-sm text-white">
+                                Power Score: <span className={`inline-block px-2 py-0.5 rounded-full ${getScoreColor(imageScores[index])}`}>{imageScores[index]}</span>
+                              </p>
+                            </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(imageUrl, '_blank')}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
+                          <div className="mt-2 flex flex-col sm:flex-row justify-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full sm:w-auto"
+                              onClick={() => window.open(imageUrl, '_blank')}
+                            >
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              View Full Size
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full sm:w-auto"
+                              onClick={() => {
+                                const link = document.createElement('a')
+                                link.href = imageUrl
+                                link.download = `avatar-${index + 1}.png`
+                                document.body.appendChild(link)
+                                link.click()
+                                document.body.removeChild(link)
+                              }}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Download
+                            </Button>
+                          </div>
+                          <div className="mt-4">
+                            <WalrusUpload
+                              imageUrl={imageUrl}
+                              collectionId={process.env.NEXT_PUBLIC_COLLECTION_ID || ''}
+                              packageId={process.env.NEXT_PUBLIC_PACKAGE_ID || ''}
+                              role={selectedRoleLabel}
+                              prompt={generationPrompts[index] || ""}
+                            />
+                          </div>
                         </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="left-2" />
-                  <CarouselNext className="right-2" />
-                </Carousel>
-
-                <a
-                  href={generatedImages[0]}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
-                >
-                  <Download className="h-4 w-4" />
-                  Download Image
-                </a>
-              </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="hidden sm:flex" />
+                <CarouselNext className="hidden sm:flex" />
+              </Carousel>
             </div>
           </div>
         )}
 
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h5 className="mb-3 text-lg font-semibold">About this tool</h5>
-          <p className="mb-4 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
+          <h5 className="mb-2 sm:mb-3 text-lg ">About this tool</h5>
+          <p className="mb-3 sm:mb-4 text-muted-foreground">
             This tool uses advanced AI technology to transform your photos and add you to any community. The transformation is powered by cutting-edge image generation models.
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className=" text-muted-foreground">
             The process may take some time depending on the complexity of your image and the current server load.
           </p>
         </div>

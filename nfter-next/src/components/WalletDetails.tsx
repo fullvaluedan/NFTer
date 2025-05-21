@@ -14,7 +14,7 @@ function NetworkSelector() {
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-muted-foreground">Select Network</h3>
+      <h3 className=" text-muted-foreground">Select Network</h3>
       <div className="flex gap-2">
         {Object.keys(ctx.networks).map((network) => (
           <Button
@@ -42,7 +42,7 @@ function FaucetRequest() {
     try {
       setIsRequesting(true);
       await requestSuiFromFaucetV2({
-        host: getFaucetHost(currentNetwork as 'testnet' | 'devnet' | 'localnet'),
+        host: getFaucetHost(currentNetwork as 'testnet'),
         recipient: account.address,
       });
       toast.success('Successfully requested SUI from faucet');
@@ -54,14 +54,14 @@ function FaucetRequest() {
     }
   };
 
-  // Only show faucet for testnet and devnet
-  if (!['testnet', 'devnet'].includes(currentNetwork)) {
+  // Only show faucet for testnet
+  if (!['testnet'].includes(currentNetwork)) {
     return null;
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-muted-foreground">Request Test SUI</h3>
+      <h3 className=" text-muted-foreground">Request Test SUI</h3>
       <Button
         variant="outline"
         size="sm"
@@ -85,6 +85,8 @@ export function WalletDetails() {
   const { data: balance } = useSuiClientQuery('getBalance', {
     owner: account?.address || '',
   });
+
+  const networkName = currentNetwork || 'Unknown Network';
 
   if (!account) {
     return (
@@ -110,27 +112,27 @@ export function WalletDetails() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Address</h3>
+              <h3 className=" text-muted-foreground">Address</h3>
               <p className="text-sm">{account.address}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Wallet Type</h3>
+              <h3 className=" text-muted-foreground">Wallet Type</h3>
               <p className="text-sm">{currentWallet?.name || 'Unknown'}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Is Slush Wallet</h3>
+              <h3 className=" text-muted-foreground">Is Slush Wallet</h3>
               <p className="text-sm">{isSlushWallet ? 'Yes' : 'No'}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Current Network</h3>
-              <p className="text-sm">{currentNetwork}</p>
+              <h3 className=" text-muted-foreground">Current Network</h3>
+              <p className="text-sm">{networkName}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Chain ID</h3>
+              <h3 className=" text-muted-foreground">Chain ID</h3>
               <p className="text-sm">{String(chainId || 'Unknown')}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Balance</h3>
+              <h3 className=" text-muted-foreground">Balance</h3>
               <p className="text-sm">
                 {balance ? `${Number(balance.totalBalance) / 1e9} SUI` : 'Loading...'}
               </p>

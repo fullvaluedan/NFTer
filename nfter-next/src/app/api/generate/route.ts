@@ -226,40 +226,20 @@ export async function POST(request: Request) {
       image_urls: imageUrls,
       role: label,
       scores,
+      prompt: prompt, // <--- Added this line!
     };
 
     console.log("Final response:", response);
 
     return NextResponse.json(response);
-  } catch (error) {
-    console.error("Error generating avatar:", error);
-
-    // Handle specific error types
-    if (error instanceof Error) {
-      if (
-        error.message.includes("401") ||
-        error.message.includes("Unauthorized")
-      ) {
-        return NextResponse.json(
-          { error: "Invalid Replicate API token" },
-          { status: 401 }
-        );
-      }
-
-      if (
-        error.message.includes("413") ||
-        error.message.includes("Payload Too Large")
-      ) {
-        return NextResponse.json(
-          { error: "Image file is too large" },
-          { status: 413 }
-        );
-      }
-    }
-
-    return NextResponse.json(
-      { error: "Failed to generate avatar" },
-      { status: 500 }
+  } catch (err) {
+    console.error("API error:", err);
+    // Bubble up the error message
+    return new Response(
+      JSON.stringify({
+        error: err instanceof Error ? err.message : String(err),
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }

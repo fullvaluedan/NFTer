@@ -1,13 +1,14 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  turbopack: {
-    resolveAlias: {
-      '@': './src',
-    },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'aggregator.walrus-testnet.walrus.space',
+        pathname: '/v1/blobs/**',
+      },
+    ],
   },
-};
+}
 
-module.exports = nextConfig; 
+export default nextConfig 
