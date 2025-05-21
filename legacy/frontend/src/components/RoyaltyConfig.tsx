@@ -47,7 +47,7 @@ export const RoyaltyConfig: React.FC<RoyaltyConfigProps> = ({ onRoyaltyChange })
       {recipients.map((recipient, index) => (
         <div key={index} className="flex gap-4 items-center">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block  text-gray-700">
               Recipient Address
             </label>
             <input
@@ -59,7 +59,7 @@ export const RoyaltyConfig: React.FC<RoyaltyConfigProps> = ({ onRoyaltyChange })
             />
           </div>
           <div className="w-32">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block  text-gray-700">
               Percentage
             </label>
             <input
@@ -84,13 +84,13 @@ export const RoyaltyConfig: React.FC<RoyaltyConfigProps> = ({ onRoyaltyChange })
 
       <button
         onClick={handleAddRecipient}
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        className="inline-flex items-center px-4 py-2 border border-transparent  rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
         Add Recipient
       </button>
 
       <div className="mt-4 p-4 bg-gray-50 rounded-md">
-        <h4 className="text-sm font-medium text-gray-700">Current Configuration</h4>
+        <h4 className=" text-gray-700">Current Configuration</h4>
         <p className="text-sm text-gray-600 mt-1">
           Primary Recipient: {recipients[0]}
         </p>

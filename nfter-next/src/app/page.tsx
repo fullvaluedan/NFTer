@@ -211,7 +211,7 @@ export default function Home() {
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium">Choose a role</label>
+            <label className="block tracking-wide">Choose a role</label>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a role (or leave random)" />
@@ -228,7 +228,7 @@ export default function Home() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium">
+            <label className="block">
               Select an image to transform
             </label>
             <div
@@ -254,7 +254,7 @@ export default function Home() {
                 </p>
                 {file && (
                   <>
-                    <p className="text-sm font-medium">
+                    <p className="">
                       Selected: {file.name}
                     </p>
                     {originalImageUrl && (
@@ -359,11 +359,11 @@ export default function Home() {
         )}
 
         <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
-          <h5 className="mb-2 sm:mb-3 text-base sm:text-lg font-semibold">About this tool</h5>
-          <p className="mb-3 sm:mb-4 text-sm text-muted-foreground">
+          <h5 className="mb-2 sm:mb-3 text-lg ">About this tool</h5>
+          <p className="mb-3 sm:mb-4 text-muted-foreground">
             This tool uses advanced AI technology to transform your photos and add you to any community. The transformation is powered by cutting-edge image generation models.
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className=" text-muted-foreground">
             The process may take some time depending on the complexity of your image and the current server load.
           </p>
         </div>

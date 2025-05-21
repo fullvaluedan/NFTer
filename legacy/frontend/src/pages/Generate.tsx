@@ -157,7 +157,7 @@ const Generate = () => {
         <div className="mb-6 rounded-lg border border-blue-500 bg-card p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">
+              <label className="block ">
                 Choose a role (or leave random)
               </label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
@@ -176,7 +176,7 @@ const Generate = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium">
+              <label className="block ">
                 Select an image to transform
               </label>
               <div
@@ -201,7 +201,7 @@ const Generate = () => {
                     Drag and drop your image here, or click to select
                   </p>
                   {file && (
-                    <p className="text-sm font-medium">
+                    <p className="">
                       Selected: {file.name}
                     </p>
                   )}
@@ -269,7 +269,7 @@ const Generate = () => {
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center gap-2 rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+                    className="mt-4 inline-flex items-center gap-2 rounded-md bg-green-500 px-4 py-2  text-white hover:bg-green-600"
                   >
                     <Download className="h-4 w-4" />
                     Download Image
