@@ -48,8 +48,8 @@ export default function RootLayout({
           <Toaster />
           <footer className="py-8 text-center text-sm text-muted-foreground">
             Crafted with ❤️ by{" "}
-            <Link href="https://digitalrain.studio" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-              digitalrain.studio
+            <Link href="https://augustinchan.dev" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              augustinchan.dev
             </Link>
             {" "}and{" "}
             <Link href="https://x.com/fullvaluedan" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
