@@ -246,9 +246,23 @@ export default function Home() {
                   Drag and drop your image here, or click to select
                 </p>
                 {file && (
-                  <p className="text-sm font-medium">
-                    Selected: {file.name}
-                  </p>
+                  <>
+                    <p className="text-sm font-medium">
+                      Selected: {file.name}
+                    </p>
+                    {originalImageUrl && (
+                      <div className="relative aspect-square w-full max-w-[150px] sm:max-w-[200px] mx-auto overflow-hidden rounded-lg border mt-2 sm:mt-3">
+                        <Image
+                          src={originalImageUrl}
+                          alt="Original image preview"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 150px, 200px"
+                          priority
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -283,6 +297,11 @@ export default function Home() {
                               className="object-cover"
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-center">
+                              <p className="text-sm text-white">
+                                Power Score: <span className={`inline-block px-2 py-0.5 rounded-full ${getScoreColor(imageScores[index])}`}>{imageScores[index]}</span>
+                              </p>
+                            </div>
                           </div>
                           <div className="mt-2 flex flex-col sm:flex-row justify-center gap-2">
                             <Button
