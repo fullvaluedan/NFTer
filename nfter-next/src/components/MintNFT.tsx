@@ -1,6 +1,6 @@
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
-import { SuiClient } from '@mysten/sui/client';
+import { SuiObjectChangeCreated, SuiObjectChange } from '@mysten/sui/client';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -8,6 +8,7 @@ import { Textarea } from './ui/textarea';
 import { useState, useEffect } from 'react'; // Import useEffect
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 interface MintNFTProps {
   walrusData: {
@@ -17,12 +18,15 @@ interface MintNFTProps {
   collectionId: string;
   packageId: string;
   role: string;
-  prompt: string;
+  prompt: string;  
 }
 
 export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: MintNFTProps) {
   const account = useCurrentAccount();
   const { mutate: signAndExecute, isPending } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+  const [mintedNftObjectId, setMintedNftObjectId] = useState<string | null>(null);
+  const [latestTransactionDigest, setLatestTransactionDigest] = useState<string | null>(null);
   
   // --- PROPS LOGGING ---
   console.log("MintNFT Props:", { walrusData, collectionId, packageId, role, prompt });
@@ -77,6 +81,11 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
 
     try {
       const txb = new Transaction();
+      if (!account) { // Double check account, though already done above
+        toast.error('Wallet not connected for setting sender');
+        return;
+      }
+      txb.setSender(account.address); // <-- Set the transaction sender
 
       // --- PAYMENT COIN LOGGING ---
       console.log("handleMint: Preparing payment coin. Gas object:", txb.gas);
@@ -177,7 +186,7 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
       // --- LOGGING TRANSACTION BLOCK ---
       console.log("handleMint: Transaction block before signing:", txb.blockData);
       try {
-        const transactionBlockBytes = await txb.build({ client: {} as SuiClient }); // Using dummy client for dry run build if needed for logging
+        const transactionBlockBytes = await txb.build({ client: suiClient });
         console.log("handleMint: Transaction block bytes (for inspection):", transactionBlockBytes);
       } catch (buildError) {
         console.error("handleMint: Error building transaction block for logging:", buildError);
@@ -189,14 +198,92 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
           transaction: txb,
         },
         {
-          onSuccess: (result) => {
-            toast.success('Successfully minted NFT!');
-            console.log('Mint transaction:', result);
+          onSuccess: async (result) => {
+            console.log('Initial mint transaction digest:', result.digest);
+            setLatestTransactionDigest(result.digest);
+            toast.success('Transaction submitted! Verifying on-chain...');
+
+            const maxRetries = 10;
+            const retryDelay = 3000; // 3 seconds
+            let attempts = 0;
+
+            const fetchTransactionDetails = async () => {
+              try {
+                const txn = await suiClient.getTransactionBlock({
+                  digest: result.digest,
+                  options: {
+                    showObjectChanges: true,
+                    showEffects: true,
+                  },
+                });
+                console.log('Full transaction details:', txn);
+
+                let newNftId: string | undefined;
+                if (txn.objectChanges) {
+                  const createdNftChange = txn.objectChanges.find(
+                    (objCh: SuiObjectChange): objCh is SuiObjectChangeCreated =>
+                      objCh.type === "created" &&
+                      objCh.objectType === `${packageId}::nfter::OffbrandNFT`
+                  );
+                  if (createdNftChange) {
+                    newNftId = createdNftChange.objectId;
+                  }
+                }
+
+                if (!newNftId && txn.effects?.created) {
+                  const createdObjects = txn.effects.created;
+                  if (createdObjects && Array.isArray(createdObjects) && account) {
+                    for (const obj of createdObjects) {
+                      if (obj && typeof obj === 'object' && 
+                          obj.owner && typeof obj.owner === 'object' && 'AddressOwner' in obj.owner && 
+                          obj.reference && typeof obj.reference === 'object' && 'objectId' in obj.reference &&
+                          obj.owner.AddressOwner === account.address) {
+                        newNftId = obj.reference.objectId as string;
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                if (newNftId) {
+                  toast.success('NFT Minted Successfully!');
+                  setMintedNftObjectId(newNftId);
+                  // if (typeof onMinted === 'function') {
+                  //   onMinted(newNftId);
+                  // } else {
+                  //   console.warn('MintNFT: onMinted prop was not a function.');
+                  // }
+                } else {
+                  console.warn("Could not find the minted NFT object ID in transaction details even after confirmation.");
+                  toast.error("Mint confirmed, but could not retrieve specific NFT details.");
+                }
+              } catch (fetchError: unknown) {
+                attempts++;
+                let errorMessage = 'An unknown error occurred during fetch.'; // Default message
+                if (fetchError instanceof Error) {
+                  errorMessage = fetchError.message;
+                } else if (typeof fetchError === 'object' && fetchError !== null && 
+                           Object.prototype.hasOwnProperty.call(fetchError, 'message') && 
+                           typeof (fetchError as { message: unknown }).message === 'string') {
+                  errorMessage = (fetchError as { message: string }).message;
+                }
+
+                if (attempts < maxRetries && errorMessage.includes('Could not find the referenced transaction')) {
+                  console.log(`Attempt ${attempts}: Transaction not found yet (Message: ${errorMessage}). Retrying in ${retryDelay / 1000}s...`);
+                  setTimeout(fetchTransactionDetails, retryDelay);
+                } else {
+                  console.error("Error fetching transaction details or max retries reached:", fetchError);
+                  toast.error("Failed to fetch NFT details after minting. Please check the transaction on the explorer.");
+                }
+              }
+            };
+
+            fetchTransactionDetails(); // Initial call to start polling
           },
           onError: (error: Error) => {
             toast.error('Failed to mint NFT');
             console.error('Mint error:', error);
-            alert(JSON.stringify(error)); // Add this for debugging
+            alert(JSON.stringify(error));
           },
         }
       );
@@ -277,6 +364,36 @@ export function MintNFT({ walrusData, collectionId, packageId, role, prompt }: M
           'Mint NFT'
         )}
       </Button>
+
+      {latestTransactionDigest && (
+        <div className="mt-6 text-center">
+          <Link
+            href={`https://testnet.suivision.xyz/txblock/${latestTransactionDigest}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 ease-in-out"
+          >
+            View Transaction on SuiVision
+          </Link>
+        </div>
+      )}
+
+      {/* Detailed success message, appears after objectId is confirmed */}
+      {mintedNftObjectId && (
+        <div className="mt-4 text-center p-3 border border-green-300 bg-green-50 rounded-lg">
+          <p className="text-lg font-semibold text-green-700 mb-2">
+            🎉 NFT Minted Successfully! 🎉
+          </p>
+          <Link
+            href={`https://testnet.suivision.xyz/object/${mintedNftObjectId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:text-blue-700 underline"
+          >
+            View Your NFT on SuiVision
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
