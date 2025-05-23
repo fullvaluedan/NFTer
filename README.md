@@ -6,6 +6,11 @@ Transform your photos into anime characters and mint them as NFTs on Sui. This m
   <img src="nfter-next/public/offbrand.png" alt="Offbrand Crypto Logo" width="300" />
 </p>
 
+**TESTNET**
+
+PACKAGE_ID=0xf623d44db431f73308e982048eefb8ac6e53ccbd9fa772451fa91c372107cfef
+COLLECTION_ID=0xcc12d8f4e0c55efff2ca7b230e75230c6be3bc1a32fcecda1b07e9ed94942254
+
 ## Features
 
 - 🎨 Transform photos into anime characters using AI
